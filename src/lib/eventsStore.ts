@@ -108,7 +108,10 @@ function readDB(): DBData {
   try {
     if (fs.existsSync(DB_FILE_PATH)) {
       const fileData = fs.readFileSync(DB_FILE_PATH, "utf-8");
-      return JSON.parse(fileData);
+      const parsed = JSON.parse(fileData);
+      if (parsed && Array.isArray(parsed.events)) {
+        return parsed;
+      }
     }
   } catch (err) {
     console.error("Error reading db file, re-initializing:", err);
@@ -138,7 +141,8 @@ export function getAllEvents(): StoredEvent[] {
 
 export function getEventById(id: string): StoredEvent | undefined {
   const db = readDB();
-  return db.events.find((e) => e.id === id);
+  const cleanId = decodeURIComponent(id || "").trim().toLowerCase();
+  return db.events.find((e) => e.id.toLowerCase() === cleanId);
 }
 
 export function addEvent(event: Omit<StoredEvent, "id" | "registeredCount" | "checkedInCount" | "remainingCapacity" | "isFull">): StoredEvent {
@@ -164,7 +168,9 @@ export function getTicketsForAttendee(attendeeEmail: string): StoredTicket[] {
 
 export function registerAttendeeForEvent(eventId: string, attendeeId: string, attendeeEmail: string): { ticket: StoredTicket; event: StoredEvent } {
   const db = readDB();
-  const evtIndex = db.events.findIndex((e) => e.id === eventId);
+  const cleanId = decodeURIComponent(eventId || "").trim().toLowerCase();
+  const evtIndex = db.events.findIndex((e) => e.id.toLowerCase() === cleanId);
+
   if (evtIndex === -1) {
     throw new Error("EVENT_NOT_FOUND");
   }
@@ -174,12 +180,12 @@ export function registerAttendeeForEvent(eventId: string, attendeeId: string, at
     throw new Error("EVENT_FULL");
   }
 
-  const existing = db.tickets.find((t) => t.eventId === eventId && t.attendeeEmail.toLowerCase() === attendeeEmail.toLowerCase());
+  const existing = db.tickets.find((t) => t.eventId.toLowerCase() === cleanId && t.attendeeEmail.toLowerCase() === attendeeEmail.toLowerCase());
   if (existing) {
     throw new Error("ALREADY_REGISTERED");
   }
 
-  const rawToken = `ORBIT-ATT-${eventId.substring(0, 6).toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+  const rawToken = `ORBIT-ATT-${event.id.substring(0, 8).toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
 
   const newTicket: StoredTicket = {
@@ -222,7 +228,7 @@ export function processCheckInToken(token: string): { checkIn: StoredCheckIn; ti
     throw err;
   }
 
-  const event = db.events.find((e) => e.id === ticket.eventId);
+  const event = db.events.find((e) => e.id.toLowerCase() === ticket.eventId.toLowerCase());
   if (!event) {
     throw new Error("EVENT_NOT_FOUND");
   }
@@ -252,10 +258,11 @@ export function processCheckInToken(token: string): { checkIn: StoredCheckIn; ti
 
 export function getDashboardMetrics(eventId: string) {
   const db = readDB();
-  const event = db.events.find((e) => e.id === eventId);
+  const cleanId = decodeURIComponent(eventId || "").trim().toLowerCase();
+  const event = db.events.find((e) => e.id.toLowerCase() === cleanId);
   if (!event) return null;
 
-  const eventCheckIns = db.checkIns.filter((c) => c.eventId === eventId);
+  const eventCheckIns = db.checkIns.filter((c) => c.eventId.toLowerCase() === cleanId);
   const checkInPercentage = event.registeredCount > 0 ? Math.round((event.checkedInCount / event.registeredCount) * 1000) / 10 : 0;
   
   const eventHasStarted = new Date() >= new Date(event.date) || event.checkedInCount > 0;

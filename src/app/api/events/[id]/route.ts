@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
+import { getEventById } from "@/lib/eventsStore";
 
 export async function GET(
   req: NextRequest,
@@ -12,18 +12,10 @@ export async function GET(
   }
 
   try {
-    const { id } = await params;
-    const event = await prisma.event.findUnique({
-      where: { id },
-      include: {
-        organizer: {
-          select: { id: true, name: true, email: true },
-        },
-        _count: {
-          select: { registrations: true, checkIns: true },
-        },
-      },
-    });
+    const { id: rawId } = await params;
+    const eventId = decodeURIComponent(rawId || "").trim();
+
+    const event = getEventById(eventId);
 
     if (!event) {
       return NextResponse.json(
@@ -32,26 +24,7 @@ export async function GET(
       );
     }
 
-    const registeredCount = event._count.registrations;
-    const remainingCapacity = Math.max(0, event.capacity - registeredCount);
-
-    return NextResponse.json(
-      {
-        event: {
-          id: event.id,
-          title: event.title,
-          description: event.description,
-          date: event.date,
-          capacity: event.capacity,
-          registeredCount,
-          checkedInCount: event._count.checkIns,
-          remainingCapacity,
-          isFull: remainingCapacity === 0,
-          organizer: event.organizer,
-        },
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ event }, { status: 200 });
   } catch (error) {
     console.error("Get event error:", error);
     return NextResponse.json(

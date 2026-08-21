@@ -14,7 +14,16 @@ export async function POST(
   const { user } = authResult;
 
   try {
-    const { id: eventId } = await params;
+    const { id: rawId } = await params;
+    const eventId = decodeURIComponent(rawId || "").trim();
+
+    if (!eventId) {
+      return NextResponse.json(
+        { error: "NOT_FOUND", message: "Event ID is required" },
+        { status: 400 }
+      );
+    }
+
     const { ticket, event } = registerAttendeeForEvent(eventId, user.id, user.email);
 
     return NextResponse.json(

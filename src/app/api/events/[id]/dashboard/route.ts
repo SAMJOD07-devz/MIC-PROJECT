@@ -13,7 +13,9 @@ export async function GET(
   }
 
   try {
-    const { id: eventId } = await params;
+    const { id: rawId } = await params;
+    const eventId = decodeURIComponent(rawId || "").trim();
+
     const metrics = getDashboardMetrics(eventId);
 
     if (!metrics) {

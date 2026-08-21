@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { AuthModal } from "@/components/AuthModal";
+import { LandingPage } from "@/components/LandingPage";
 import { OrganizerView } from "@/components/OrganizerView";
 import { AttendeeView } from "@/components/AttendeeView";
 import { CameraScanner } from "@/components/CameraScanner";
@@ -17,7 +18,7 @@ interface SessionUser {
 
 export default function HomePage() {
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [activeTab, setActiveTab] = useState<"events" | "tickets" | "organizer" | "scanner">("events");
+  const [activeTab, setActiveTab] = useState<"landing" | "events" | "tickets" | "organizer" | "scanner">("landing");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -37,9 +38,12 @@ export default function HomePage() {
         } else {
           setActiveTab("events");
         }
+      } else {
+        setActiveTab("landing");
       }
     } catch (err) {
       console.error("Session check error:", err);
+      setActiveTab("landing");
     } finally {
       setLoading(false);
     }
@@ -52,7 +56,7 @@ export default function HomePage() {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
-      setActiveTab("events");
+      setActiveTab("landing");
     }
   }
 
@@ -90,8 +94,8 @@ export default function HomePage() {
       {/* Navigation Header */}
       <Header
         user={user}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        activeTab={activeTab === "landing" ? "events" : activeTab}
+        setActiveTab={(tab) => setActiveTab(tab)}
         onOpenLogin={() => setShowAuthModal(true)}
         onLogout={handleLogout}
         onQuickLogin={handleQuickLogin}
@@ -105,8 +109,13 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            {/* View Switcher based on Active Tab */}
-            {activeTab === "scanner" && user?.role === "ORGANIZER" ? (
+            {activeTab === "landing" && !user ? (
+              <LandingPage
+                onEnterOrganizer={() => handleQuickLogin("ORGANIZER")}
+                onEnterAttendee={() => handleQuickLogin("ATTENDEE")}
+                onOpenLogin={() => setShowAuthModal(true)}
+              />
+            ) : activeTab === "scanner" && user?.role === "ORGANIZER" ? (
               <CameraScanner />
             ) : user?.role === "ORGANIZER" ? (
               <OrganizerView />
@@ -135,8 +144,13 @@ export default function HomePage() {
       <footer className="border-t border-slate-800/80 bg-slate-950/80 py-6 text-center text-xs text-slate-500 relative z-10 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-400">OrbitCheck System</span>
-            <span>— MIC Recruitment Event Management</span>
+            <span
+              onClick={() => setActiveTab(user ? (user.role === "ORGANIZER" ? "organizer" : "events") : "landing")}
+              className="font-bold text-slate-400 cursor-pointer hover:text-white transition"
+            >
+              OrbitCheck System
+            </span>
+            <span>— MIC Campus Event Command Center</span>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-slate-500">
             <span>Server Concurrency Protected</span>

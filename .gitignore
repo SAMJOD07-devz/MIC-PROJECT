@@ -1,0 +1,11 @@
+# Root .gitignore for OrbitCheck
+
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+*.db
+*.db-journal
+*.log
+.DS_Store

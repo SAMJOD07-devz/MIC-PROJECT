@@ -22,8 +22,19 @@
   - Created initial seed dataset in `prisma/seed.ts` (1 organizer, 3 attendees, 1 event with capacity 50, 3 registrations, 1 check-in).
   - Configured `"prisma": { "seed": "tsx prisma/seed.ts" }` in `package.json`.
   - Ran `npx prisma generate` (Generated Prisma Client v7.9.1) and verified `npx tsc --noEmit` cleanly (0 errors).
+- **Phase 2 (Authentication & Enforced Roles)**:
+  - Built password hashing (`bcryptjs`) & JWT session manager (`jsonwebtoken`) in `src/lib/auth.ts`.
+  - Created API endpoints:
+    - `POST /api/auth/register` (Registers user, sets HTTP-only session cookie).
+    - `POST /api/auth/login` (Authenticates credentials, sets session cookie).
+    - `POST /api/auth/logout` (Clears session cookie).
+    - `GET /api/auth/me` (Returns current user session).
+    - `GET /api/organizer/protected-test` (Organizer role guard test).
+    - `GET /api/attendee/protected-test` (Attendee role guard test).
+  - Implemented Next.js route protection middleware (`src/middleware.ts`).
+  - Added automated test suite `tests/auth.test.ts` (6/6 passed: unauthenticated 401 rejection, attendee->organizer 403 rejection, role authorization).
 
-## 3. Environment Variables
+## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/orbitcheck?schema=public"
 JWT_SECRET="orbitcheck-super-secret-jwt-key-2026"
@@ -33,22 +44,23 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 
 ## 4. Key Commands
 - **Development Server**: `cd orbit-check && npm run dev`
-- **Generate Prisma Client**: `cd orbit-check && npx prisma generate`
-- **Database Push / Seed**: `cd orbit-check && npx prisma db push && npx prisma db seed`
+- **Auth Unit Tests**: `cd orbit-check && npx tsx tests/auth.test.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
-- **Push to GitHub**: `git add . && git commit -m "Phase 1: Foundation & Database Schema" && git push origin main`
+- **Push Phase 2 to GitHub**: `git add . && git commit -m "Phase 2: Authentication and Enforced Roles" && git push origin main`
 
-## 5. Files Changed in Phase 1
-- `orbit-check/package.json`
-- `orbit-check/prisma/schema.prisma`
-- `orbit-check/prisma.config.ts`
-- `orbit-check/.env`
-- `orbit-check/.env.example`
+## 5. Files Changed in Phase 2
+- `.gitignore` (Root secret shield)
+- `orbit-check/src/lib/auth.ts`
 - `orbit-check/src/lib/env.ts`
-- `orbit-check/src/lib/prisma.ts`
-- `orbit-check/src/app/layout.tsx`
-- `orbit-check/prisma/seed.ts`
+- `orbit-check/src/middleware.ts`
+- `orbit-check/src/app/api/auth/register/route.ts`
+- `orbit-check/src/app/api/auth/login/route.ts`
+- `orbit-check/src/app/api/auth/logout/route.ts`
+- `orbit-check/src/app/api/auth/me/route.ts`
+- `orbit-check/src/app/api/organizer/protected-test/route.ts`
+- `orbit-check/src/app/api/attendee/protected-test/route.ts`
+- `orbit-check/tests/auth.test.ts`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next Incomplete Phase
-- **Phase 2 — Authentication and Enforced Roles**: Implement authentication endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/me`), HTTP-only JWT cookies, and role-based authorization guards on the server side.
+- **Phase 3 — Event Creation, Registration, and Capacity Safety**: Implement organizer event creation and attendee event registration with atomic database-level capacity enforcement (`SERIALIZABLE` isolation / locked transaction) and 100+ concurrent registration proof script.

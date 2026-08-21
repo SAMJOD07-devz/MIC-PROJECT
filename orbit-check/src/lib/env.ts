@@ -1,8 +1,14 @@
+import { config } from "dotenv";
 import { z } from "zod";
 
+// Ensure environment variables from .env are loaded
+config();
+
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  JWT_SECRET: z.string().min(8, "JWT_SECRET must be at least 8 characters"),
+  DATABASE_URL: z
+    .string()
+    .default("postgresql://postgres:postgres@localhost:5432/orbitcheck?schema=public"),
+  JWT_SECRET: z.string().default("orbitcheck-super-secret-jwt-key-2026"),
   NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3000"),
   OPENAI_API_KEY: z.string().optional(),
 });

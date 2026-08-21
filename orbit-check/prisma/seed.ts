@@ -1,8 +1,7 @@
-import { PrismaClient, Role, RegistrationStatus } from "@prisma/client";
+import { Role, RegistrationStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-
-const prisma = new PrismaClient();
+import { prisma } from "../src/lib/prisma";
 
 async function main() {
   console.log("🌱 Seeding OrbitCheck database...");
@@ -84,7 +83,7 @@ async function main() {
   });
 
   const token2 = generateQrToken("ATT-2");
-  const reg2 = await prisma.registration.create({
+  await prisma.registration.create({
     data: {
       eventId: event.id,
       attendeeId: attendee2.id,

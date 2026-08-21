@@ -13,12 +13,9 @@ import {
   Users,
   Zap,
   Download,
-  BarChart3,
-  CheckCircle2,
-  Lock,
-  WifiOff,
-  QrCode
+  BarChart3
 } from 'lucide-react';
+import { PastEventsMarquee } from '@/components/UI/PastEventsMarquee';
 import { playClickSFX, playHoverSFX } from '@/lib/audio';
 
 interface LandingPageProps {
@@ -364,7 +361,10 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 5. WORKFLOW PAPER SECTION */}
+      {/* 5. INFINITE MARQUEE LOOP OF PAST MANAGED CAMPUS EVENTS (VIT CHENNAI) */}
+      <PastEventsMarquee />
+
+      {/* 6. WORKFLOW PAPER SECTION */}
       <section id="workflow" className="bg-[#f0ede7] py-20 px-4 text-slate-900">
         <div className="max-w-7xl mx-auto space-y-12">
           
@@ -393,7 +393,7 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 6. REAL-WORLD EVENT MANAGER CAPABILITIES */}
+      {/* 7. REAL-WORLD EVENT MANAGER CAPABILITIES */}
       <section className="bg-[#16151a] py-20 px-4 text-white">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-2">
@@ -448,7 +448,7 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 7. FOOTER */}
+      {/* 8. FOOTER */}
       <footer className="bg-[#16151a] border-t border-white/10 py-12 px-4 text-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-slate-400 font-mono">
           <div className="flex items-center gap-3">

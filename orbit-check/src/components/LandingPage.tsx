@@ -12,6 +12,7 @@ import {
   Users,
   ShieldCheck,
   Zap,
+  Code2,
 } from 'lucide-react';
 import { PastEventsMarquee } from '@/components/UI/PastEventsMarquee';
 import { playClickSFX, playHoverSFX } from '@/lib/audio';
@@ -118,7 +119,7 @@ export function LandingPage({
       <div className="grain" aria-hidden="true" />
 
       <main>
-        {/* 1. HERO SECTION WITH DYNAMIC LIVE CAMPUS ORBIT GRAPHICS */}
+        {/* 1. HERO SECTION WITH CREATOR PROOF BADGE */}
         <section id="top" className="hero section-dark">
           {/* SVG Cosmic Background */}
           <div className="absolute inset-0 z-[-3] overflow-hidden pointer-events-none">
@@ -151,9 +152,12 @@ export function LandingPage({
           <div className="hero-vignette" aria-hidden="true" />
           <div className="container hero-grid">
             <div className="hero-copy">
+              {/* CREATOR PROOF EYEBROW */}
               <div className="eyebrow">
                 <span className="eyebrow-dot" /> Live event operating system{' '}
-                <span className="eyebrow-muted">EST. 2024</span>
+                <span className="eyebrow-muted font-bold text-[#ffabdd] uppercase tracking-wider">
+                  • CREATED &amp; BUILT BY SAUMYA PANDYA (MIC VITC)
+                </span>
               </div>
               <h1>
                 Make every <em>arrival</em> count.
@@ -483,7 +487,7 @@ export function LandingPage({
         </section>
       </main>
 
-      {/* 8. FOOTER */}
+      {/* 8. FOOTER WITH CREATOR SIGNATURE PROOF */}
       <footer className="footer section-dark">
         <div className="container footer-top">
           <button className="brand footer-brand" type="button" onClick={() => scrollTo('top')}>
@@ -496,8 +500,8 @@ export function LandingPage({
             </span>
           </button>
           <div className="footer-note">
-            <span className="mono-label">A SMALLER QUEUE FOR A BIGGER MOMENT</span>
-            <strong>Built for the people who make campus feel alive.</strong>
+            <span className="mono-label">CREATOR ATTRIBUTION &amp; PROOF</span>
+            <strong className="text-[#ffabdd]">Engineered &amp; Designed by Saumya Pandya for MIC VITC.</strong>
           </div>
           <div className="footer-links">
             <button type="button" onClick={() => scrollTo('platform')}>
@@ -518,7 +522,7 @@ export function LandingPage({
           </div>
         </div>
         <div className="container footer-bottom">
-          <span>© 2026 OrbitCheck — Campus Event Operating System</span>
+          <span>© 2026 OrbitCheck — Engineered &amp; Built by Saumya Pandya (MIC VITC)</span>
           <span>
             System status <i className="status-dot" /> All signals clear
           </span>

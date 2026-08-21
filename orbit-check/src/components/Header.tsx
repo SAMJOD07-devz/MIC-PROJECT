@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, LogOut, ShieldCheck, Ticket, Calendar, QrCode, Menu, X, Volume2, VolumeX, ArrowUpRight } from "lucide-react";
+import { User, LogOut, ShieldCheck, Ticket, Calendar, QrCode, Menu, X, Volume2, VolumeX, ArrowUpRight, Code2 } from "lucide-react";
 import { toggleAudioMute, playHoverSFX, playClickSFX } from "@/lib/audio";
 
 interface SessionUser {
@@ -45,23 +45,30 @@ export function Header({
   return (
     <header className="topbar">
       <div className="container topbar-inner">
-        {/* Kinetic Editorial Brand Logo */}
-        <button
-          className="brand cursor-pointer"
-          type="button"
-          onClick={() => {
-            playClickSFX();
-            scrollTo("top");
-          }}
-        >
-          <span className="brand-mark">
-            <span>O</span>
+        {/* Kinetic Editorial Brand Logo & Creator Proof */}
+        <div className="flex items-center gap-3">
+          <button
+            className="brand cursor-pointer"
+            type="button"
+            onClick={() => {
+              playClickSFX();
+              scrollTo("top");
+            }}
+          >
+            <span className="brand-mark">
+              <span>O</span>
+            </span>
+            <span className="brand-wordmark">
+              Orbit<span>Check</span>
+              <small>Campus events / check-in</small>
+            </span>
+          </button>
+
+          {/* CREATOR PROOF BADGE */}
+          <span className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-[#e443b4]/40 bg-[#e443b4]/15 px-3 py-1 text-[10px] font-mono font-bold text-[#ffabdd] tracking-wider uppercase shadow-sm">
+            <Code2 className="w-3 h-3 text-[#e443b4]" /> Built by Saumya Pandya
           </span>
-          <span className="brand-wordmark">
-            Orbit<span>Check</span>
-            <small>Campus events / check-in</small>
-          </span>
-        </button>
+        </div>
 
         {/* Public Landing Desktop Nav */}
         {!user && (

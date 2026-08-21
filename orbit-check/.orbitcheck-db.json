@@ -59,9 +59,9 @@
         "email": "organizer@orbitcheck.com"
       },
       "id": "evt-1787327784166",
-      "registeredCount": 0,
+      "registeredCount": 1,
       "checkedInCount": 0,
-      "remainingCapacity": 50,
+      "remainingCapacity": 49,
       "isFull": false
     }
   ],
@@ -78,6 +78,19 @@
       "qrTokenHash": "a6ed419872c0ea599220cf5141f1ac0a32b1a398e500ae169934126aca6a4b96",
       "status": "REGISTERED",
       "registeredAt": "2026-08-21T15:52:08.407Z"
+    },
+    {
+      "id": "tkt-1787328209603",
+      "eventId": "evt-1787327784166",
+      "eventTitle": "mic - 2",
+      "eventDescription": "mic 2",
+      "eventDate": "2026-08-28T15:56:00.000Z",
+      "attendeeId": "att-demo-1",
+      "attendeeEmail": "attendee1@vitstudent.ac.in",
+      "qrToken": "ORBIT-ATT-EVT-17-D4C8606F",
+      "qrTokenHash": "f80eb6e0d9c8f487512162da74477b229c5c966bb1c068d52ea243db482eeea8",
+      "status": "REGISTERED",
+      "registeredAt": "2026-08-21T16:03:29.603Z"
     }
   ],
   "checkIns": []

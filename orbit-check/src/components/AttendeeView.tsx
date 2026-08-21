@@ -24,6 +24,7 @@ interface TicketItem {
   eventDate: string;
   qrToken: string;
   qrTokenHash: string;
+  qrCodeDataUrl?: string;
   status: "REGISTERED" | "CHECKED_IN" | "CANCELLED";
   registeredAt: string;
   checkInTime?: string;
@@ -136,60 +137,73 @@ export function AttendeeView() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myTickets.map((t) => (
-              <div
-                key={t.id}
-                className="rounded-3xl border border-white/15 bg-white/5 p-6 space-y-4 backdrop-blur-xl shadow-xl relative overflow-hidden flex flex-col justify-between"
-                style={{
-                  borderTop: t.status === "CHECKED_IN" ? "4px solid #10b981" : "4px solid #e443b4"
-                }}
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-mono text-[#ffabdd] tracking-widest uppercase font-bold">
-                      DIGITAL PASS TOKEN
-                    </span>
-                    {t.status === "CHECKED_IN" ? (
-                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                        <UserCheck className="w-3 h-3" /> CHECKED-IN
+            {myTickets.map((t) => {
+              const qrImageUrl = t.qrCodeDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(t.qrToken)}`;
+              return (
+                <div
+                  key={t.id}
+                  className="rounded-3xl border border-white/15 bg-white/5 p-6 space-y-4 backdrop-blur-xl shadow-xl relative overflow-hidden flex flex-col justify-between"
+                  style={{
+                    borderTop: t.status === "CHECKED_IN" ? "4px solid #10b981" : "4px solid #e443b4"
+                  }}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-mono text-[#ffabdd] tracking-widest uppercase font-bold">
+                        DIGITAL PASS TOKEN
                       </span>
-                    ) : (
-                      <span className="rounded-full bg-[#e443b4]/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-[#ffabdd] border border-[#e443b4]/30 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-[#e443b4]" /> READY FOR SCAN
-                      </span>
-                    )}
+                      {t.status === "CHECKED_IN" ? (
+                        <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                          <UserCheck className="w-3 h-3" /> CHECKED-IN
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-[#e443b4]/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-[#ffabdd] border border-[#e443b4]/30 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-[#e443b4]" /> READY FOR SCAN
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="font-heading text-lg font-bold text-white leading-snug">
+                      {t.eventTitle}
+                    </h3>
+
+                    <p className="text-xs text-slate-300 font-light line-clamp-2">
+                      {t.eventDescription}
+                    </p>
+
+                    <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 pt-1">
+                      <Calendar className="w-3.5 h-3.5 text-[#7a54ff]" />
+                      <span>{new Date(t.eventDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
                   </div>
 
-                  <h3 className="font-heading text-lg font-bold text-white leading-snug">
-                    {t.eventTitle}
-                  </h3>
+                  {/* SCANNABLE 2D QR CODE MATRIX BOX */}
+                  <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                    <div className="p-4 rounded-2xl bg-white text-slate-900 flex flex-col items-center justify-center text-center space-y-3 shadow-inner">
+                      <div className="font-mono text-[10px] tracking-widest text-slate-500 uppercase font-bold">OFFICIAL ORBIT PASS QR</div>
+                      
+                      {/* 2D QR Code Matrix Image */}
+                      <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-md">
+                        <img
+                          src={qrImageUrl}
+                          alt={`QR Code for ${t.qrToken}`}
+                          className="w-36 h-36 object-contain"
+                        />
+                      </div>
 
-                  <p className="text-xs text-slate-300 font-light line-clamp-2">
-                    {t.eventDescription}
-                  </p>
+                      <strong className="font-mono text-xs sm:text-sm font-extrabold text-[#16151a] tracking-wider select-all break-all bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+                        {t.qrToken}
+                      </strong>
+                      <span className="text-[8px] font-mono text-slate-400">Show 2D QR Matrix or Token to organizer webcam scanner at door</span>
+                    </div>
 
-                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 pt-1">
-                    <Calendar className="w-3.5 h-3.5 text-[#7a54ff]" />
-                    <span>{new Date(t.eventDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    <div className="text-[9px] font-mono text-slate-400 text-center">
+                      Registered: {new Date(t.registeredAt).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
-
-                {/* QR CODE TOKEN BOX */}
-                <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
-                  <div className="p-4 rounded-2xl bg-white text-slate-900 flex flex-col items-center justify-center text-center space-y-2 shadow-inner">
-                    <div className="font-mono text-[10px] tracking-widest text-slate-500 uppercase">OFFICIAL ORBIT PASS TOKEN</div>
-                    <strong className="font-mono text-sm sm:text-base font-extrabold text-[#16151a] tracking-wider select-all break-all">
-                      {t.qrToken}
-                    </strong>
-                    <span className="text-[8px] font-mono text-slate-400">Show token or QR to organizer webcam scanner at door</span>
-                  </div>
-
-                  <div className="text-[9px] font-mono text-slate-400 text-center">
-                    Registered: {new Date(t.registeredAt).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

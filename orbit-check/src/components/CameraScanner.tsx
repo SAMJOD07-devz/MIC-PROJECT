@@ -49,7 +49,6 @@ export function CameraScanner() {
 
   async function startCamera() {
     playClickSFX();
-    setScanError(null);
     try {
       if (html5QrCodeRef.current) {
         await stopCamera();
@@ -58,8 +57,16 @@ export function CameraScanner() {
       const html5QrCode = new Html5Qrcode("qr-reader");
       html5QrCodeRef.current = html5QrCode;
 
+      const cameras = await Html5Qrcode.getCameras().catch(() => []);
+      let cameraIdOrConfig: any = { facingMode: "user" };
+
+      if (cameras && cameras.length > 0) {
+        const backCamera = cameras.find((c) => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("rear"));
+        cameraIdOrConfig = backCamera ? backCamera.id : cameras[0].id;
+      }
+
       await html5QrCode.start(
-        { facingMode: "environment" },
+        cameraIdOrConfig,
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
@@ -73,12 +80,26 @@ export function CameraScanner() {
       setCameraActive(true);
     } catch (err: any) {
       console.error("Html5Qrcode start error:", err);
+      // Fallback try with facingMode user
+      try {
+        if (html5QrCodeRef.current) {
+          await html5QrCodeRef.current.start(
+            { facingMode: "user" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => handleAutoScannedQr(decodedText),
+            () => {}
+          );
+          setCameraActive(true);
+          return;
+        }
+      } catch (fallbackErr) {
+        console.error("Fallback camera start error:", fallbackErr);
+      }
+
       alert("Unable to access webcam device. Please grant camera permissions or use manual token entry.");
       setCameraActive(false);
     }
   }
-
-  const [scanError, setScanError] = useState<string | null>(null);
 
   async function stopCamera() {
     if (html5QrCodeRef.current) {
@@ -230,7 +251,7 @@ export function CameraScanner() {
             </div>
 
             {/* Video Canvas Container for Html5Qrcode Reader */}
-            <div className="relative h-72 sm:h-80 bg-black/80 rounded-2xl overflow-hidden border border-white/15 flex items-center justify-center">
+            <div className="relative h-72 sm:h-80 bg-black rounded-2xl overflow-hidden border border-white/15 flex items-center justify-center">
               <div
                 id="qr-reader"
                 className={`w-full h-full object-cover ${cameraActive ? "block" : "hidden"}`}

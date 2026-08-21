@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Ticket, Calendar, MapPin, CheckCircle2, QrCode, Sparkles, Clock, Download, Printer, UserCheck } from "lucide-react";
+import { Ticket, Calendar, MapPin, CheckCircle2, QrCode, Sparkles, Clock, Download, Printer, UserCheck, Activity } from "lucide-react";
 import { playClickSFX, playHoverSFX } from "@/lib/audio";
 
 interface EventItem {
@@ -35,12 +35,21 @@ export function AttendeeView() {
   const [loading, setLoading] = useState(true);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
 
+  // 3-SECOND REAL-TIME LIVE POLLING
   useEffect(() => {
-    fetchEvents();
+    fetchEvents(true);
     fetchMyTickets();
+
+    const interval = setInterval(() => {
+      fetchEvents(false);
+      fetchMyTickets();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  async function fetchEvents() {
+  async function fetchEvents(showSpinner = false) {
+    if (showSpinner) setLoading(true);
     try {
       const res = await fetch("/api/events");
       const data = await res.json();
@@ -50,7 +59,7 @@ export function AttendeeView() {
     } catch (err) {
       console.error("Fetch events error:", err);
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }
 
@@ -76,7 +85,7 @@ export function AttendeeView() {
       const data = await res.json();
       if (res.ok) {
         alert("🎉 Successfully claimed digital pass QR ticket!");
-        fetchEvents();
+        fetchEvents(false);
         fetchMyTickets();
       } else {
         alert(data.message || "Registration failed");
@@ -191,7 +200,9 @@ export function AttendeeView() {
           <span className="text-[10px] font-mono font-bold tracking-widest text-[#ffabdd] uppercase flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-[#e443b4]" /> Discover Live Campus Events
           </span>
-          <span className="text-[10px] font-mono text-slate-400">{events.length} Events Available</span>
+          <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" /> {events.length} Live Events
+          </span>
         </div>
 
         {loading ? (

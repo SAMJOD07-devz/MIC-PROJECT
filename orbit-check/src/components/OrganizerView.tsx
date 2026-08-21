@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Download,
@@ -18,7 +18,8 @@ import {
   Zap,
   X,
   Check,
-  Search
+  Search,
+  Activity
 } from "lucide-react";
 import { playClickSFX, playHoverSFX } from "@/lib/audio";
 
@@ -63,6 +64,9 @@ interface AiInsightResponse {
 export function OrganizerView() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const selectedEventRef = useRef<EventItem | null>(null);
+  selectedEventRef.current = selectedEvent;
+
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,8 +99,18 @@ export function OrganizerView() {
     "What recommendations do you have for organizer gate staffing?",
   ];
 
+  // 3-SECOND REAL-TIME LIVE DATABASE SYNC POLLING
   useEffect(() => {
-    fetchEvents();
+    fetchEvents(true);
+
+    const interval = setInterval(() => {
+      fetchEvents(false);
+      if (selectedEventRef.current) {
+        fetchDashboardMetrics(selectedEventRef.current.id);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -105,21 +119,21 @@ export function OrganizerView() {
     }
   }, [selectedEvent?.id]);
 
-  async function fetchEvents() {
-    setLoading(true);
+  async function fetchEvents(showInitialSpinner = false) {
+    if (showInitialSpinner) setLoading(true);
     try {
       const res = await fetch("/api/events");
       const data = await res.json();
       if (res.ok && data.events) {
         setEvents(data.events);
-        if (data.events.length > 0 && !selectedEvent) {
+        if (data.events.length > 0 && !selectedEventRef.current) {
           setSelectedEvent(data.events[0]);
         }
       }
     } catch (err) {
       console.error("Fetch events error:", err);
-    } finally {
-      setLoading(false);
+    } fontinally: {
+      if (showInitialSpinner) setLoading(false);
     }
   }
 
@@ -164,7 +178,7 @@ export function OrganizerView() {
       setDescription("");
       setDate("");
       setCapacity(50);
-      fetchEvents();
+      fetchEvents(true);
     } catch (err) {
       alert("Network error creating event");
     } finally {
@@ -196,7 +210,7 @@ export function OrganizerView() {
         });
         setScanToken("");
         if (selectedEvent) fetchDashboardMetrics(selectedEvent.id);
-        fetchEvents();
+        fetchEvents(false);
       } else if (res.status === 409) {
         setScanStatus({
           type: "duplicate",
@@ -262,8 +276,8 @@ export function OrganizerView() {
             <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Organizer Command Console
             </h1>
-            <span className="rounded-full bg-[#e443b4]/20 px-3 py-1 text-[10px] font-mono font-bold text-[#ffabdd] border border-[#e443b4]/40 uppercase tracking-widest">
-              Role: ORGANIZER
+            <span className="rounded-full bg-[#e443b4]/20 px-3 py-1 text-[10px] font-mono font-bold text-[#ffabdd] border border-[#e443b4]/40 uppercase tracking-widest flex items-center gap-1.5">
+              <Activity className="w-3 h-3 text-[#e443b4] animate-pulse" /> Live DB Sync (3s)
             </span>
           </div>
           <p className="text-slate-300 text-xs sm:text-sm font-light max-w-xl leading-relaxed">
@@ -293,7 +307,9 @@ export function OrganizerView() {
             <span className="text-[10px] font-mono font-bold tracking-widest text-[#ffabdd] uppercase flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5 text-[#e443b4]" /> Active Campus Events
             </span>
-            <span className="text-[10px] font-mono text-slate-400">{events.length} Loaded</span>
+            <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" /> {events.length} Live
+            </span>
           </div>
 
           {loading ? (
@@ -367,7 +383,9 @@ export function OrganizerView() {
                 {/* Event Title Header & Export Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
                   <div>
-                    <span className="text-[9px] font-mono text-[#ffabdd] tracking-widest uppercase">SELECTED EVENT COMMAND</span>
+                    <span className="text-[9px] font-mono text-[#ffabdd] tracking-widest uppercase font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> LIVE METRICS STREAM
+                    </span>
                     <h2 className="font-heading text-xl font-extrabold text-white mt-0.5">
                       {selectedEvent.title}
                     </h2>

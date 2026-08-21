@@ -1,5 +1,6 @@
 {
+  "framework": "nextjs",
   "buildCommand": "cd orbit-check && npm run build",
   "installCommand": "cd orbit-check && npm install",
-  "framework": "nextjs"
+  "outputDirectory": "orbit-check/.next"
 }

@@ -1,0 +1,13 @@
+{
+  "name": "mic-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd orbit-check && npm run build",
+    "dev": "cd orbit-check && npm run dev",
+    "start": "cd orbit-check && npm start"
+  },
+  "dependencies": {
+    "next": "16.0.7"
+  }
+}

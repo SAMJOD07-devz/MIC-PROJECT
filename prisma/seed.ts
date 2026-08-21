@@ -46,7 +46,7 @@ async function main() {
   const attendee1Vit = await prisma.user.create({
     data: {
       email: "attendee1@vitstudent.ac.in",
-      name: "Saumya Gaurav (VITC)",
+      name: "MIC Organizer (VITC)",
       passwordHash,
       role: Role.ATTENDEE,
     },

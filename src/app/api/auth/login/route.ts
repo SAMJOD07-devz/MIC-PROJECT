@@ -20,7 +20,7 @@ const MOCK_USERS = [
   {
     id: "att-demo-1",
     email: "attendee1@vitstudent.ac.in",
-    name: "Saumya Gaurav (VITC)",
+    name: "MIC Organizer (VITC)",
     role: Role.ATTENDEE,
   },
   {

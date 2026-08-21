@@ -65,7 +65,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   }
 
   async function handleGoogleLogin() {
-    const inputEmail = window.prompt("Enter your VIT Student Google Email:", "saumya.2023@vitstudent.ac.in");
+    const inputEmail = window.prompt("Enter your VIT Student Google Email:", "student.2026@vitstudent.ac.in");
     if (!inputEmail) return; // User canceled prompt
 
     if (!inputEmail.toLowerCase().endsWith("@vitstudent.ac.in")) {

@@ -25,7 +25,7 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
       { position: '3rd Place', teamName: 'Team DevPulse', projectName: 'Smart Roster Exporter', prizeMoney: '₹30,000', college: 'VIT Chennai' },
     ],
     coordinators: [
-      { name: 'Saumya Gaurav', role: 'President & Tech Lead', email: 'saumya.gauravkumar2025@vitstudent.ac.in', phone: '+91 98765 43210' },
+      { name: 'MIC Event Lead', role: 'President & Tech Lead', email: 'president.mic@vitstudent.ac.in', phone: '+91 98765 43210' },
       { name: 'Ananya Sharma', role: 'Operations Head', email: 'ananya.sharma2025@vitstudent.ac.in', phone: '+91 98765 43211' },
     ],
     stats: { scansPerMinute: 120, avgLatencyMs: 78, duplicateBlocked: 34 }
@@ -69,7 +69,7 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
       { position: '2nd Place', teamName: 'Team DevPulse', projectName: 'Real-Time Telemetry Engine', prizeMoney: '₹30,000', college: 'VIT Chennai' },
     ],
     coordinators: [
-      { name: 'Saumya Gaurav', role: 'MIC President', email: 'saumya.gauravkumar2025@vitstudent.ac.in', phone: '+91 98765 43210' },
+      { name: 'MIC Event Lead', role: 'MIC President', email: 'president.mic@vitstudent.ac.in', phone: '+91 98765 43210' },
     ],
     stats: { scansPerMinute: 95, avgLatencyMs: 82, duplicateBlocked: 18 }
   },
@@ -109,7 +109,7 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
       { position: '1st Place', teamName: 'Team AgenticAI', projectName: 'Autonomous Campus Concierge', prizeMoney: '₹60,000', college: 'VIT Chennai' },
     ],
     coordinators: [
-      { name: 'Saumya Gaurav', role: 'MIC President', email: 'saumya.gauravkumar2025@vitstudent.ac.in', phone: '+91 98765 43210' },
+      { name: 'MIC Event Lead', role: 'MIC President', email: 'president.mic@vitstudent.ac.in', phone: '+91 98765 43210' },
     ],
     stats: { scansPerMinute: 110, avgLatencyMs: 74, duplicateBlocked: 29 }
   },

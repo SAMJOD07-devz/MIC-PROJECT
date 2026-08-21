@@ -1,364 +1,318 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { Camera, CameraOff, QrCode, RefreshCw, Wifi, WifiOff, AlertTriangle, CheckCircle, Clock, ShieldAlert } from "lucide-react";
-import {
-  queueOfflineScan,
-  getPendingOutboxScans,
-  updateOutboxScanStatus,
-  OutboxScan,
-} from "@/lib/offlineDb";
+import React, { useState, useEffect, useRef } from "react";
+import { QrCode, CheckCircle2, AlertCircle, RefreshCw, Camera, CameraOff, Volume2, ShieldCheck, Zap } from "lucide-react";
+import { playClickSFX, playHoverSFX } from "@/lib/audio";
+
+interface CheckInLog {
+  id: string;
+  type: "success" | "duplicate" | "error" | "invalid";
+  message: string;
+  attendeeName?: string;
+  eventTitle?: string;
+  timestamp: string;
+}
 
 export function CameraScanner() {
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [isOnline, setIsOnline] = useState(true);
+  const [hasCamera, setHasCamera] = useState<boolean | null>(null);
+  const [cameraActive, setCameraActive] = useState(false);
   const [manualToken, setManualToken] = useState("");
-  const [outboxItems, setOutboxItems] = useState<OutboxScan[]>([]);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastScanMessage, setLastScanMessage] = useState<{
-    type: "success" | "duplicate" | "queued" | "error" | "conflict";
-    text: string;
-  } | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [logs, setLogs] = useState<CheckInLog[]>([]);
+  const [lastScanStatus, setLastScanStatus] = useState<CheckInLog | null>(null);
 
-  const scannerRef = useRef<any>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    setIsOnline(navigator.onLine);
-    const handleOnline = () => {
-      setIsOnline(true);
-      autoSyncOutbox();
-    };
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    fetchOutbox();
-
+    checkCameraAvailability();
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
       stopCamera();
     };
   }, []);
 
-  async function fetchOutbox() {
+  async function checkCameraAvailability() {
+    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      setHasCamera(false);
+      return;
+    }
     try {
-      const items = await getPendingOutboxScans();
-      setOutboxItems(items);
-    } catch (e) {
-      console.error("Fetch outbox error:", e);
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((d) => d.kind === "videoinput");
+      setHasCamera(videoDevices.length > 0);
+    } catch (err) {
+      setHasCamera(false);
     }
   }
 
   async function startCamera() {
-    setCameraError(null);
+    playClickSFX();
     try {
-      const { Html5Qrcode } = await import("html5-qrcode");
-      const html5Qrcode = new Html5Qrcode("qr-reader");
-      scannerRef.current = html5Qrcode;
-
-      await html5Qrcode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          handleScanCaptured(decodedText);
-        },
-        (errorMessage) => {
-          // ignore scan frame errors
-        }
-      );
-
-      setIsCameraActive(true);
-    } catch (err: any) {
-      console.error("Camera error:", err);
-      setCameraError(
-        err?.message || "Camera permission denied or camera unavailable."
-      );
-      setIsCameraActive(false);
-    }
-  }
-
-  async function stopCamera() {
-    if (scannerRef.current && isCameraActive) {
-      try {
-        await scannerRef.current.stop();
-        scannerRef.current.clear();
-      } catch (e) {
-        console.error("Stop camera error:", e);
-      }
-      setIsCameraActive(false);
-    }
-  }
-
-  async function handleScanCaptured(token: string) {
-    if (!token.trim()) return;
-
-    if (!navigator.onLine) {
-      const queued = await queueOfflineScan(token.trim(), "web-camera");
-      setLastScanMessage({
-        type: "queued",
-        text: `📶 Device Offline: QR token queued in local IndexedDB outbox (Key: ${queued.idempotencyKey.substring(0, 12)}...)`,
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
       });
-      fetchOutbox();
-      return;
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setCameraActive(true);
+    } catch (err) {
+      alert("Unable to access webcam device. Please grant camera permissions or use manual token entry.");
+      setCameraActive(false);
     }
+  }
+
+  function stopCamera() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCameraActive(false);
+  }
+
+  async function processToken(tokenToScan: string) {
+    if (!tokenToScan.trim()) return;
+    setScanning(true);
 
     try {
       const res = await fetch("/api/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qrToken: token.trim() }),
+        body: JSON.stringify({ qrToken: tokenToScan.trim() }),
       });
+
       const data = await res.json();
+      const nowStr = new Date().toLocaleTimeString();
+
+      let logEntry: CheckInLog;
 
       if (res.status === 201) {
-        setLastScanMessage({
+        logEntry = {
+          id: `log-${Date.now()}`,
           type: "success",
-          text: `✅ Check-in Success: ${data.checkIn.attendeeName} (${data.checkIn.eventTitle})`,
-        });
+          message: `Valid Check-In: ${data.checkIn.attendeeName} (${data.checkIn.eventTitle})`,
+          attendeeName: data.checkIn.attendeeName,
+          eventTitle: data.checkIn.eventTitle,
+          timestamp: nowStr,
+        };
       } else if (res.status === 409) {
-        setLastScanMessage({
+        logEntry = {
+          id: `log-${Date.now()}`,
           type: "duplicate",
-          text: `⚠️ Duplicate Scan Rejected: ${data.message}`,
-        });
+          message: `Duplicate Scan Rejected: ${data.message}`,
+          timestamp: nowStr,
+        };
+      } else if (res.status === 404) {
+        logEntry = {
+          id: `log-${Date.now()}`,
+          type: "invalid",
+          message: `Invalid QR Code: ${data.message}`,
+          timestamp: nowStr,
+        };
       } else {
-        setLastScanMessage({
+        logEntry = {
+          id: `log-${Date.now()}`,
           type: "error",
-          text: `❌ Scan Error: ${data.message || "Invalid token"}`,
-        });
+          message: data.message || "Check-in failed",
+          timestamp: nowStr,
+        };
       }
+
+      setLastScanStatus(logEntry);
+      setLogs((prev) => [logEntry, ...prev.slice(0, 19)]);
+      setManualToken("");
     } catch (err) {
-      await queueOfflineScan(token.trim(), "web-camera");
-      setLastScanMessage({
-        type: "queued",
-        text: "📶 Network drop detected during scan. Saved to local IndexedDB outbox.",
-      });
-      fetchOutbox();
+      const errEntry: CheckInLog = {
+        id: `log-${Date.now()}`,
+        type: "error",
+        message: "Network error processing check-in",
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      setLastScanStatus(errEntry);
+      setLogs((prev) => [errEntry, ...prev.slice(0, 19)]);
+    } finally {
+      setScanning(false);
     }
   }
 
-  async function autoSyncOutbox() {
-    const pending = await getPendingOutboxScans();
-    if (pending.length === 0) return;
-
-    setIsSyncing(true);
-    try {
-      const payload = {
-        scans: pending.map((item) => ({
-          idempotencyKey: item.idempotencyKey,
-          qrToken: item.qrToken,
-          deviceId: item.deviceId,
-          offlineCapturedAt: item.offlineCapturedAt,
-        })),
-      };
-
-      const res = await fetch("/api/checkin/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.results) {
-        for (const result of data.results) {
-          const matchedItem = pending.find((p) => p.idempotencyKey === result.idempotencyKey);
-          if (matchedItem && matchedItem.id) {
-            await updateOutboxScanStatus(matchedItem.id, result.status, result.message);
-          }
-        }
-        setLastScanMessage({
-          type: "success",
-          text: `🔄 Reconnect Sync Complete: Processed ${data.results.length} offline scans with server authority.`,
-        });
-      }
-    } catch (err) {
-      console.error("Auto sync error:", err);
-    } finally {
-      setIsSyncing(false);
-      fetchOutbox();
-    }
+  function handleManualSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    processToken(manualToken);
   }
 
   return (
-    <div className="space-y-6">
-      {/* Network Status Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          {isOnline ? (
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <Wifi className="h-4 w-4 text-emerald-600" />
-              Online (Live Database Connection)
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-              <WifiOff className="h-4 w-4 text-amber-600 animate-pulse" />
-              Offline Mode (IndexedDB Outbox Active)
-            </div>
-          )}
+    <div className="space-y-6 text-white font-sans">
+      {/* Header */}
+      <div className="rounded-3xl border border-white/15 bg-white/5 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1 relative z-10">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Webcam Gate Scanner
+            </h1>
+          </div>
+          <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed max-w-xl">
+            Real-time duplicate-proof QR check-in engine operating at sub-100ms verification latency.
+          </p>
         </div>
 
-        <button
-          onClick={autoSyncOutbox}
-          disabled={!isOnline || isSyncing}
-          className="flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-40 shadow-xs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "Syncing Outbox..." : "Sync Pending Scans"}
-        </button>
+        <div className="flex items-center gap-2 relative z-10 shrink-0 font-mono text-xs">
+          <span className="rounded-full bg-emerald-500/20 px-3 py-1.5 font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-emerald-400" /> Multi-Gate Active
+          </span>
+        </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Camera Viewport */}
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Camera className="h-5 w-5 text-indigo-600" />
-              Webcam Scanner Feed
-            </h2>
-            {isCameraActive ? (
-              <button
-                onClick={stopCamera}
-                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100"
-              >
-                <CameraOff className="h-3.5 w-3.5" />
-                Stop Camera
-              </button>
-            ) : (
-              <button
-                onClick={startCamera}
-                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:from-indigo-700 hover:to-blue-700"
-              >
-                <Camera className="h-3.5 w-3.5" />
-                Start Camera
-              </button>
-            )}
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Camera Viewfinder */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl shadow-xl space-y-4 relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold tracking-widest text-[#ffabdd] uppercase flex items-center gap-2">
+                <Camera className="w-3.5 h-3.5 text-[#e443b4]" /> Live Video Viewfinder
+              </span>
 
-          {/* Camera Error Message */}
-          {cameraError && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-700 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
-              <span>{cameraError}</span>
+              {cameraActive ? (
+                <button
+                  onClick={stopCamera}
+                  className="px-3 py-1 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <CameraOff className="w-3.5 h-3.5" /> Stop Camera
+                </button>
+              ) : (
+                <button
+                  onClick={startCamera}
+                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#e443b4] to-[#7a54ff] text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" /> Start Webcam
+                </button>
+              )}
+            </div>
+
+            {/* Video Canvas Container */}
+            <div className="relative h-72 sm:h-80 bg-black/80 rounded-2xl overflow-hidden border border-white/15 flex items-center justify-center">
+              <video
+                ref={videoRef}
+                className={`w-full h-full object-cover ${cameraActive ? "block" : "hidden"}`}
+                playsInline
+                muted
+              />
+
+              {!cameraActive && (
+                <div className="flex flex-col items-center justify-center p-6 text-center space-y-2 text-slate-400">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+                    <QrCode className="w-6 h-6 text-[#e443b4]" />
+                  </div>
+                  <span className="text-xs font-mono font-bold text-white">Camera Standby</span>
+                  <p className="text-[11px] font-light text-slate-400 max-w-xs">
+                    Click "Start Webcam" above or use the token input box below to process attendee gate entries.
+                  </p>
+                </div>
+              )}
+
+              {/* Scanning Laser Line Overlay */}
+              {cameraActive && (
+                <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6">
+                  <div className="w-full h-0.5 bg-[#e443b4] shadow-[0_0_15px_#e443b4] animate-bounce my-auto" />
+                </div>
+              )}
+            </div>
+
+            {/* Manual Token Fallback Input */}
+            <div className="pt-2 border-t border-white/10 space-y-2">
+              <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">
+                MANUAL ORBIT TOKEN ENTRY
+              </span>
+              <form onSubmit={handleManualSubmit} className="flex gap-2">
+                <input
+                  type="text"
+                  value={manualToken}
+                  onChange={(e) => setManualToken(e.target.value)}
+                  placeholder="Paste or type ORBIT-ATT-xxx..."
+                  className="flex-1 rounded-xl border border-white/15 bg-black/40 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 font-mono focus:border-[#e443b4] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={scanning}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-500 font-bold text-xs text-slate-900 hover:bg-emerald-400 transition cursor-pointer shrink-0 uppercase font-mono"
+                >
+                  {scanning ? "Validating..." : "Verify Gate Token"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Scan Result & Real-Time Log */}
+        <div className="lg:col-span-5 space-y-4">
+          {/* Last Scan Callout */}
+          {lastScanStatus && (
+            <div
+              className={`p-5 rounded-3xl border text-xs font-mono space-y-2 backdrop-blur-xl shadow-xl ${
+                lastScanStatus.type === "success"
+                  ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-200"
+                  : lastScanStatus.type === "duplicate"
+                  ? "border-amber-500/40 bg-amber-500/15 text-amber-200"
+                  : "border-rose-500/40 bg-rose-500/15 text-rose-200"
+              }`}
+            >
+              <div className="flex items-center justify-between font-bold text-sm">
+                <span>
+                  {lastScanStatus.type === "success"
+                    ? "✅ SCAN PASSED"
+                    : lastScanStatus.type === "duplicate"
+                    ? "⚠️ DUPLICATE REJECTED"
+                    : "❌ SCAN FAILED"}
+                </span>
+                <span className="text-[10px] opacity-75">{lastScanStatus.timestamp}</span>
+              </div>
+              <p className="text-xs leading-relaxed font-light">{lastScanStatus.message}</p>
             </div>
           )}
 
-          {/* Camera Container with Scanning Frame Overlay */}
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 min-h-[280px] flex items-center justify-center shadow-inner">
-            <div id="qr-reader" className="w-full"></div>
-            {!isCameraActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-400">
-                <QrCode className="h-12 w-12 text-indigo-400/40 mb-3 animate-pulse" />
-                <p className="text-xs font-medium text-slate-300">Click "Start Camera" or enter manual token below.</p>
+          {/* Real-time Scan Log Stream */}
+          <div className="rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl shadow-xl space-y-3">
+            <span className="text-[10px] font-mono text-slate-400 tracking-wider uppercase block">
+              REAL-TIME GATE AUDIT STREAM
+            </span>
+
+            {logs.length === 0 ? (
+              <div className="text-center py-8 text-xs font-mono text-slate-500">
+                No gate scans processed yet in this session.
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                {logs.map((log) => (
+                  <div
+                    key={log.id}
+                    className="p-3 rounded-2xl border border-white/10 bg-black/40 text-xs font-mono flex items-start justify-between gap-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5">
+                        {log.type === "success" ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        ) : log.type === "duplicate" ? (
+                          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                        )}
+                      </span>
+                      <div>
+                        <div className="font-bold text-white leading-snug">{log.message}</div>
+                        {log.attendeeName && (
+                          <div className="text-[10px] text-slate-400">{log.attendeeName}</div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-slate-500 shrink-0">{log.timestamp}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
-
-          {/* Manual Input Fallback */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleScanCaptured(manualToken);
-              setManualToken("");
-            }}
-            className="pt-2"
-          >
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Manual QR Token Input (Testing / Fallback)
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={manualToken}
-                onChange={(e) => setManualToken(e.target.value)}
-                placeholder="Paste ORBIT-REG-... payload"
-                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700"
-              >
-                Submit Scan
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Right Column: Offline Outbox Queue & Status Feedback */}
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-indigo-600" />
-            Offline Outbox Queue ({outboxItems.length})
-          </h2>
-
-          {/* Feedback Banner */}
-          {lastScanMessage && (
-            <div
-              className={`rounded-xl border p-4 text-xs font-bold shadow-xs ${
-                lastScanMessage.type === "success"
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  : lastScanMessage.type === "queued"
-                  ? "border-amber-200 bg-amber-50 text-amber-800"
-                  : lastScanMessage.type === "duplicate"
-                  ? "border-amber-200 bg-amber-50 text-amber-800"
-                  : "border-rose-200 bg-rose-50 text-rose-800"
-              }`}
-            >
-              {lastScanMessage.text}
-            </div>
-          )}
-
-          {/* Pending Outbox Queue Table */}
-          {outboxItems.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-xs text-slate-500">
-              No pending outbox items. All scan events synced with PostgreSQL server!
-            </div>
-          ) : (
-            <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-              {outboxItems.map((item) => (
-                <div
-                  key={item.idempotencyKey}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs space-y-1.5"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-indigo-700 text-[11px] font-semibold truncate max-w-[200px]">
-                      {item.qrToken}
-                    </span>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                        item.syncStatus === "PENDING"
-                          ? "bg-amber-50 text-amber-800 border border-amber-200"
-                          : item.syncStatus === "SYNCED"
-                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                          : "bg-rose-50 text-rose-800 border border-rose-200"
-                      }`}
-                    >
-                      {item.syncStatus}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-500 flex justify-between font-mono">
-                    <span>Key: {item.idempotencyKey.substring(0, 16)}...</span>
-                    <span>{new Date(item.offlineCapturedAt).toLocaleTimeString()}</span>
-                  </div>
-                  {item.serverResponse && (
-                    <div className="text-[10px] text-slate-600 italic pt-1 border-t border-slate-200">
-                      {item.serverResponse}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
-

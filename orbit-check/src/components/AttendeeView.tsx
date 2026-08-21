@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Ticket, Calendar, CheckCircle2, AlertCircle, Sparkles, Clock, QrCode, ArrowRight, ShieldCheck, MapPin } from "lucide-react";
+import { Ticket, Calendar, MapPin, CheckCircle2, QrCode, Sparkles, Clock, Download, Printer, UserCheck } from "lucide-react";
+import { playClickSFX, playHoverSFX } from "@/lib/audio";
 
 interface EventItem {
   id: string;
@@ -10,330 +11,252 @@ interface EventItem {
   date: string;
   capacity: number;
   registeredCount: number;
+  checkedInCount: number;
   remainingCapacity: number;
   isFull: boolean;
 }
 
 interface TicketItem {
-  registrationId: string;
+  id: string;
   eventId: string;
   eventTitle: string;
   eventDescription: string;
   eventDate: string;
-  status: string;
-  registeredAt: string;
   qrToken: string;
-  qrCodeDataUrl: string;
-  checkInTime: string | null;
-  isCheckedIn: boolean;
+  qrTokenHash: string;
+  status: "REGISTERED" | "CHECKED_IN" | "CANCELLED";
+  registeredAt: string;
+  checkInTime?: string;
 }
 
 export function AttendeeView() {
   const [events, setEvents] = useState<EventItem[]>([]);
-  const [tickets, setTickets] = useState<TicketItem[]>([]);
+  const [myTickets, setMyTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
-  const [bannerMessage, setBannerMessage] = useState<{
-    type: "success" | "error" | "full" | "already";
-    text: string;
-  } | null>(null);
 
   useEffect(() => {
-    fetchEventsAndTickets();
+    fetchEvents();
+    fetchMyTickets();
   }, []);
 
-  async function fetchEventsAndTickets() {
-    setLoading(true);
+  async function fetchEvents() {
     try {
-      const [eventsRes, ticketsRes] = await Promise.all([
-        fetch("/api/events"),
-        fetch("/api/tickets/me"),
-      ]);
-
-      const eventsData = await eventsRes.json();
-      const ticketsData = await ticketsRes.json();
-
-      if (eventsRes.ok) setEvents(eventsData.events || []);
-      if (ticketsRes.ok) setTickets(ticketsData.tickets || []);
+      const res = await fetch("/api/events");
+      const data = await res.json();
+      if (res.ok && data.events) {
+        setEvents(data.events);
+      }
     } catch (err) {
-      console.error("Fetch attendee view data error:", err);
+      console.error("Fetch events error:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleRegister(eventId: string) {
-    setRegisteringId(eventId);
-    setBannerMessage(null);
+  async function fetchMyTickets() {
+    try {
+      const res = await fetch("/api/tickets/me");
+      const data = await res.json();
+      if (res.ok && data.tickets) {
+        setMyTickets(data.tickets);
+      }
+    } catch (err) {
+      console.error("Fetch tickets error:", err);
+    }
+  }
 
+  async function handleRegister(eventId: string) {
+    playClickSFX();
+    setRegisteringId(eventId);
     try {
       const res = await fetch(`/api/events/${eventId}/register`, {
         method: "POST",
       });
       const data = await res.json();
-
-      if (res.status === 201) {
-        setBannerMessage({
-          type: "success",
-          text: `🎉 Successfully registered for "${data.registration.event.title}"! Ticket generated below.`,
-        });
-        fetchEventsAndTickets();
-      } else if (res.status === 409) {
-        if (data.error === "EVENT_FULL") {
-          setBannerMessage({
-            type: "full",
-            text: `⚠️ Capacity Full: Event has reached its maximum capacity.`,
-          });
-        } else {
-          setBannerMessage({
-            type: "already",
-            text: `ℹ️ Already Registered: You already hold a ticket for this event.`,
-          });
-        }
+      if (res.ok) {
+        alert("🎉 Successfully claimed digital pass QR ticket!");
+        fetchEvents();
+        fetchMyTickets();
       } else {
-        setBannerMessage({
-          type: "error",
-          text: `❌ ${data.message || "Registration failed"}`,
-        });
+        alert(data.message || "Registration failed");
       }
     } catch (err) {
-      setBannerMessage({
-        type: "error",
-        text: "❌ Network failure during registration",
-      });
+      alert("Network error registering for event");
     } finally {
       setRegisteringId(null);
     }
   }
 
+  const registeredEventIds = new Set(myTickets.map((t) => t.eventId));
+
   return (
-    <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-        <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-bold text-indigo-700">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-            MIC Campus Event Hub
+    <div className="space-y-8 text-white font-sans">
+      {/* Banner */}
+      <div className="rounded-3xl border border-white/15 bg-white/5 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[#7a54ff]/20 via-[#e443b4]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="space-y-1 relative z-10">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#7a54ff] animate-pulse" />
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Attendee Pass Command
+            </h1>
           </div>
-
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-            Discover Campus Events & Present Your <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">Digital QR Ticket</span>
-          </h1>
-
-          <p className="text-sm text-slate-600 max-w-xl leading-relaxed">
-            OrbitCheck guarantees atomic capacity bounds and real-time attendance validation. Register for campus hackathons & tech summits and present your encrypted QR ticket at gate check-in.
+          <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed max-w-xl">
+            Discover active campus events, claim duplicate-proof digital QR tickets, and check in seamlessly at venue doors.
           </p>
         </div>
 
-        {/* Hero Light Graphic Feature Preview Card */}
-        <div className="lg:col-span-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/50 space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                <span className="text-xs font-bold text-slate-900">Digital Access Pass</span>
-              </div>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                ACTIVE PASS
-              </span>
-            </div>
-            <div className="flex items-center gap-3 pt-1">
-              <div className="p-2 bg-indigo-50 border border-indigo-100 rounded-xl">
-                <QrCode className="w-8 h-8 text-indigo-600" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900">Instant Gate Scan</div>
-                <div className="text-[11px] text-slate-500">Anti-sharing SHA-256 protected QR code</div>
-              </div>
-            </div>
+        <div className="flex items-center gap-3 relative z-10 shrink-0">
+          <div className="rounded-2xl border border-[#7a54ff]/30 bg-[#7a54ff]/15 px-4 py-2.5 text-xs font-mono text-[#b5a1ff] flex items-center gap-2">
+            <Ticket className="w-4 h-4 text-[#e443b4]" />
+            <span><b>{myTickets.length}</b> My Passes</span>
           </div>
         </div>
       </div>
 
-      {/* Message Banner Notification */}
-      {bannerMessage && (
-        <div
-          className={`rounded-2xl border p-4 text-xs font-semibold shadow-xs ${
-            bannerMessage.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : bannerMessage.type === "full"
-              ? "border-rose-200 bg-rose-50 text-rose-800"
-              : bannerMessage.type === "already"
-              ? "border-indigo-200 bg-indigo-50 text-indigo-800"
-              : "border-rose-200 bg-rose-50 text-rose-800"
-          }`}
-        >
-          {bannerMessage.text}
-        </div>
-      )}
-
-      {/* Section 1: My Personal Entry Tickets */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <div className="flex items-center gap-2">
-            <Ticket className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-lg font-bold text-slate-900">My Entry QR Tickets</h2>
-            <span className="rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
-              {tickets.length} Active
+      {/* MY DIGITAL QR TICKETS SECTION */}
+      {myTickets.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <span className="text-[10px] font-mono font-bold tracking-widest text-[#ffabdd] uppercase flex items-center gap-2">
+              <Ticket className="w-3.5 h-3.5 text-[#e443b4]" /> My Claimed Digital QR Passes
             </span>
+            <span className="text-[10px] font-mono text-slate-400">{myTickets.length} Digital Tickets Active</span>
           </div>
-        </div>
 
-        {loading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500">
-            Loading your digital tickets...
-          </div>
-        ) : tickets.length === 0 ? (
-          /* Styled Rich Empty State Card */
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center space-y-3 shadow-xs">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600">
-              <QrCode className="h-6 w-6" />
-            </div>
-            <h3 className="font-bold text-slate-900 text-sm">No Active Tickets Yet</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              You haven't registered for any campus recruitment events. Browse available events below to claim your ticket!
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {tickets.map((ticket) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {myTickets.map((t) => (
               <div
-                key={ticket.registrationId}
-                className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-indigo-200"
+                key={t.id}
+                className="rounded-3xl border border-white/15 bg-white/5 p-6 space-y-4 backdrop-blur-xl shadow-xl relative overflow-hidden flex flex-col justify-between"
+                style={{
+                  borderTop: t.status === "CHECKED_IN" ? "4px solid #10b981" : "4px solid #e443b4"
+                }}
               >
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-base leading-snug">{ticket.eventTitle}</h3>
-                      <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-500">
-                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                        <span>{new Date(ticket.eventDate).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-
-                    {/* Check-In Status Badge */}
-                    {ticket.isCheckedIn ? (
-                      <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 shadow-xs">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                        CHECKED IN
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-mono text-[#ffabdd] tracking-widest uppercase font-bold">
+                      DIGITAL PASS TOKEN
+                    </span>
+                    {t.status === "CHECKED_IN" ? (
+                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                        <UserCheck className="w-3 h-3" /> CHECKED-IN
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 shadow-xs">
-                        <Clock className="h-3.5 w-3.5 text-indigo-600" />
-                        REGISTERED
+                      <span className="rounded-full bg-[#e443b4]/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-[#ffabdd] border border-[#e443b4]/30 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-[#e443b4]" /> READY FOR SCAN
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-3 text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                    {ticket.eventDescription}
+                  <h3 className="font-heading text-lg font-bold text-white leading-snug">
+                    {t.eventTitle}
+                  </h3>
+
+                  <p className="text-xs text-slate-300 font-light line-clamp-2">
+                    {t.eventDescription}
                   </p>
+
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 pt-1">
+                    <Calendar className="w-3.5 h-3.5 text-[#7a54ff]" />
+                    <span>{new Date(t.eventDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
                 </div>
 
-                {/* QR Code Presentation Stage */}
-                <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Token Identity</div>
-                    <div className="font-mono text-[11px] text-indigo-700 font-semibold truncate max-w-[180px]">
-                      {ticket.qrToken}
-                    </div>
-                    <div className="text-[10px] text-slate-500">Present to gate organizer</div>
+                {/* QR CODE TOKEN BOX */}
+                <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                  <div className="p-4 rounded-2xl bg-white text-slate-900 flex flex-col items-center justify-center text-center space-y-2 shadow-inner">
+                    <div className="font-mono text-[10px] tracking-widest text-slate-500 uppercase">OFFICIAL ORBIT PASS TOKEN</div>
+                    <strong className="font-mono text-sm sm:text-base font-extrabold text-[#16151a] tracking-wider select-all break-all">
+                      {t.qrToken}
+                    </strong>
+                    <span className="text-[8px] font-mono text-slate-400">Show token or QR to organizer webcam scanner at door</span>
                   </div>
 
-                  {ticket.qrCodeDataUrl && (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-xs">
-                      <img
-                        src={ticket.qrCodeDataUrl}
-                        alt="QR Entry Ticket"
-                        className="h-20 w-20 object-contain"
-                      />
-                    </div>
-                  )}
+                  <div className="text-[9px] font-mono text-slate-400 text-center">
+                    Registered: {new Date(t.registeredAt).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Section 2: Event Discovery & Capacity Cards */}
-      <div className="space-y-4 pt-6 border-t border-slate-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-lg font-bold text-slate-900">Available Campus Events</h2>
-          </div>
+      {/* DISCOVER ALL CAMPUS EVENTS CATALOG */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+          <span className="text-[10px] font-mono font-bold tracking-widest text-[#ffabdd] uppercase flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#e443b4]" /> Discover Live Campus Events
+          </span>
+          <span className="text-[10px] font-mono text-slate-400">{events.length} Events Available</span>
         </div>
 
-        {events.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-500">
-            No upcoming events listed at this time.
+        {loading ? (
+          <div className="rounded-3xl border border-white/15 bg-white/5 p-8 text-center text-xs font-mono text-slate-400 animate-pulse">
+            Loading live campus events...
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((evt) => {
-              const isRegistered = tickets.some((t) => t.eventId === evt.id);
-              const capacityPercentage = Math.round((evt.registeredCount / evt.capacity) * 100);
-
+              const isAlreadyRegistered = registeredEventIds.has(evt.id);
               return (
                 <div
                   key={evt.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 transition hover:shadow-md shadow-xs"
+                  onMouseEnter={playHoverSFX}
+                  className="rounded-3xl border border-white/15 bg-white/5 p-6 space-y-4 backdrop-blur-xl shadow-xl flex flex-col justify-between hover:border-white/25 transition duration-300"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-bold text-slate-900 text-base leading-snug">{evt.title}</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-mono text-[#ffabdd] tracking-widest uppercase font-bold">
+                        CAMPUS EVENT
+                      </span>
                       {evt.isFull ? (
-                        <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
+                        <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-rose-300 border border-rose-500/30 uppercase">
                           FULL
                         </span>
                       ) : (
-                        <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                          OPEN
+                        <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-emerald-300 border border-emerald-500/30 uppercase">
+                          {evt.remainingCapacity} SPOTS LEFT
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-2 text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                    <h3 className="font-heading text-lg font-bold text-white leading-snug">
+                      {evt.title}
+                    </h3>
+
+                    <p className="text-xs text-slate-300 font-light leading-relaxed line-clamp-3">
                       {evt.description}
                     </p>
 
-                    {/* Capacity Progress Bar */}
-                    <div className="mt-5 space-y-1.5 border-t border-slate-100 pt-4">
-                      <div className="flex justify-between text-[11px] font-semibold">
-                        <span className="text-slate-500">Capacity Filled</span>
-                        <span className="text-indigo-600">{evt.registeredCount} / {evt.capacity} ({capacityPercentage}%)</span>
-                      </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            evt.isFull ? "bg-rose-500" : "bg-gradient-to-r from-indigo-600 to-blue-600"
-                          }`}
-                          style={{ width: `${Math.min(100, capacityPercentage)}%` }}
-                        />
-                      </div>
+                    <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 pt-1">
+                      <Calendar className="w-3.5 h-3.5 text-[#7a54ff]" />
+                      <span>{new Date(evt.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                   </div>
 
-                  <div className="mt-6">
-                    {isRegistered ? (
+                  <div className="pt-4 border-t border-white/10">
+                    {isAlreadyRegistered ? (
+                      <div className="w-full py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-center font-mono text-xs font-bold text-emerald-300 flex items-center justify-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" /> Pass Claimed
+                      </div>
+                    ) : evt.isFull ? (
                       <button
                         disabled
-                        className="w-full rounded-xl border border-emerald-200 bg-emerald-50 py-2.5 text-xs font-bold text-emerald-800"
+                        className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-500 font-mono text-xs font-bold opacity-50 cursor-not-allowed uppercase"
                       >
-                        ✓ Registered
+                        Event At Capacity
                       </button>
                     ) : (
                       <button
                         onClick={() => handleRegister(evt.id)}
-                        disabled={evt.isFull || registeringId === evt.id}
-                        className={`w-full rounded-xl py-2.5 text-xs font-bold text-white shadow-xs transition ${
-                          evt.isFull
-                            ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-                            : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
-                        }`}
+                        disabled={registeringId === evt.id}
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#e443b4] to-[#7a54ff] text-white font-mono text-xs font-bold hover:opacity-95 transition shadow-lg uppercase tracking-wider cursor-pointer"
                       >
-                        {registeringId === evt.id ? "Registering..." : evt.isFull ? "Event Full" : "Register Now"}
+                        {registeringId === evt.id ? "Claiming Pass..." : "Claim Digital QR Pass"}
                       </button>
                     )}
                   </div>
@@ -346,4 +269,3 @@ export function AttendeeView() {
     </div>
   );
 }
-

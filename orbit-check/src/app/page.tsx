@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { AuthModal } from "@/components/AuthModal";
 import { OrganizerView } from "@/components/OrganizerView";
 import { AttendeeView } from "@/components/AttendeeView";
-import { Sparkles, Calendar, ShieldCheck, Ticket, QrCode } from "lucide-react";
+import { CameraScanner } from "@/components/CameraScanner";
 
 interface SessionUser {
   id: string;
@@ -101,8 +101,10 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            {/* View Switcher based on User Role & Active Tab */}
-            {user?.role === "ORGANIZER" ? (
+            {/* View Switcher based on Active Tab */}
+            {activeTab === "scanner" && user?.role === "ORGANIZER" ? (
+              <CameraScanner />
+            ) : user?.role === "ORGANIZER" ? (
               <OrganizerView />
             ) : (
               <AttendeeView />
@@ -135,7 +137,7 @@ export default function HomePage() {
           <div className="flex items-center gap-4 text-[11px] text-slate-500">
             <span>Server Concurrency Protected</span>
             <span>•</span>
-            <span>Prisma PostgreSQL Engine</span>
+            <span>IndexedDB Offline Outbox</span>
           </div>
         </div>
       </footer>

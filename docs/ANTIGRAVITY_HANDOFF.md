@@ -13,6 +13,7 @@
 - **Anti-Sharing QR Strategy**: Server-bound opaque token payload containing registration UUID, event ID, attendee ID, and salt; stored as SHA-256 hash (`qrTokenHash`). Rendered dynamically via Base64 SVG/PNG DataURLs. One-time consumption enforced upon check-in.
 - **Atomic Duplicate Check-In Strategy**: `CheckIn.registrationId UNIQUE` DB constraint + `$transaction` ensures that even across multiple parallel Node server processes, exactly 1 scan succeeds and all duplicate attempts return status `409 ALREADY_CHECKED_IN` with the original check-in timestamp.
 - **UI Architecture**: Dark navy futuristic campus command center theme, glassmorphism containers, responsive role-based navigation, explicit state notifications (`SUCCESS`, `DUPLICATE`, `FULL`, `INVALID_TOKEN`).
+- **Offline Outbox Architecture**: IndexedDB storage via `Dexie.js` storing scan events with client UUID idempotency keys (`idempotencyKey`), device ID, and timestamp. Reconnect auto-sync flushes to batch endpoint `/api/checkin/sync`. Server authority resolves Station A / Station B races cleanly.
 
 ## 2. Completed Work
 - **Phase 0 (Discovery & Architecture Contract)**:
@@ -48,11 +49,14 @@
   - Added automated unit test suite `tests/checkin.test.ts` (3/3 passed).
 - **Phase 6 (Functional Frontend User Flows)**:
   - Installed `lucide-react`.
-  - Built `Header.tsx` (responsive role navigation & quick demo logins).
-  - Built `AuthModal.tsx` (login & registration modal).
-  - Built `OrganizerView.tsx` (event creation, metric cards, scanner console & duplicate feedback).
-  - Built `AttendeeView.tsx` (event discovery, 1-click registration & personal QR ticket cards).
-  - Integrated state & routes in `src/app/page.tsx`.
+  - Built `Header.tsx`, `AuthModal.tsx`, `OrganizerView.tsx`, `AttendeeView.tsx`, and `src/app/page.tsx`.
+- **Phase 7 (Camera Scanning & Offline-First Outbox Sync)**:
+  - Installed `dexie` and `html5-qrcode`.
+  - Built IndexedDB outbox manager in `src/lib/offlineDb.ts`.
+  - Built batch sync endpoint `POST /api/checkin/sync` with idempotency record caching.
+  - Built live camera scanner component `src/components/CameraScanner.tsx` with webcam controls, manual fallback, online/offline auto-sync, and IndexedDB outbox log.
+  - Documented Station A / Station B race resolution in `docs/OFFLINE_SYNC.md`.
+  - Added automated unit test suite `tests/offline-sync.test.ts` (3/3 passed).
 
 ## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
@@ -64,18 +68,20 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 
 ## 4. Key Commands
 - **Development Server**: `cd orbit-check && npm run dev`
+- **Offline Sync Unit Tests**: `cd orbit-check && npx tsx tests/offline-sync.test.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
-- **Push Phase 6 to GitHub**: `git add . && git commit -m "Phase 6: Functional Frontend User Flows" && git push origin main`
+- **Push Phase 7 to GitHub**: `git add . && git commit -m "Phase 7: Camera Scanning and Offline-First Outbox Sync" && git push origin main`
 
-## 5. Files Changed in Phase 6
+## 5. Files Changed in Phase 7
 - `orbit-check/package.json`
 - `orbit-check/package-lock.json`
-- `orbit-check/src/components/Header.tsx`
-- `orbit-check/src/components/AuthModal.tsx`
-- `orbit-check/src/components/OrganizerView.tsx`
-- `orbit-check/src/components/AttendeeView.tsx`
+- `orbit-check/src/lib/offlineDb.ts`
+- `orbit-check/src/app/api/checkin/sync/route.ts`
+- `orbit-check/src/components/CameraScanner.tsx`
 - `orbit-check/src/app/page.tsx`
+- `orbit-check/tests/offline-sync.test.ts`
+- `docs/OFFLINE_SYNC.md`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next Incomplete Phase
-- **Phase 7 — Camera Scanning and Offline-First Outbox Sync**: Integrate live camera QR decoder library (`html5-qrcode`), browser webcam permissions, and IndexedDB outbox queue with client idempotency key for offline scan buffering and reconnect synchronization.
+- **Phase 8 — Live Operations Dashboard and CSV Export**: Implement organizer real-time attendee dashboard (capacity, checked-in count, remaining, no-show %, peak check-in time, attendee roster with timestamps) and organizer-only CSV export endpoint (`GET /api/events/[id]/export`).

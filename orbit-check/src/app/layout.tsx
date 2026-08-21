@@ -33,9 +33,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${syne.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full bg-[#16151a] antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#16151a] text-[#16151a] selection:bg-[#e443b4] selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#16151a] text-slate-100 selection:bg-[#e443b4] selection:text-white margin-0 p-0 overflow-x-hidden">
         {children}
       </body>
     </html>

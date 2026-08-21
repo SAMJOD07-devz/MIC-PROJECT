@@ -32,6 +32,7 @@
 - **Phase 10 (3D Visual Enhancement & Motion Layer)**: HTML5 node vector mesh Canvas background (`MotionBackground.tsx`).
 - **Phase 11 (Final Verification, Evidence Suite & Polish)**: Executed complete automated verification suite (26/26 unit tests passed, 2/2 concurrency scripts passed, zero `tsc` errors), authored evidence report in `docs/VERIFICATION_SUITE.md`.
 - **UI Redesign Phase 1 (UI Audit Only)**: Audited all existing UI render components, mapped user states, identified layout deficiencies, confirmed 0 typecheck errors, and authored `docs/UI_AUDIT.md`.
+- **UI Redesign Phase 2 (Design System & Tokens)**: Established design system tokens, color palettes, glass elevation levels, border radius, typography scale, component tokens, button variants, status badges, metric cards, skeleton states, and reduced-motion rules in `docs/DESIGN_SYSTEM.md`.
 
 ## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
@@ -45,10 +46,11 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 - **Development Server**: `cd orbit-check && npm run dev`
 - **Run All Unit Tests**: `cd orbit-check && npx tsx tests/auth.test.ts && npx tsx tests/events.test.ts && npx tsx tests/qr.test.ts && npx tsx tests/checkin.test.ts && npx tsx tests/offline-sync.test.ts && npx tsx tests/dashboard-export.test.ts && npx tsx tests/ai-insights.test.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
+- **Push UI Redesign Phase 2 to GitHub**: `git add . && git commit -m "UI Redesign Phase 2: Design System & Visual Tokens" && git push origin main`
 
-## 5. Changed Files in UI Redesign Phase 1
-- `docs/UI_AUDIT.md`
+## 5. Changed Files in UI Redesign Phase 2
+- `docs/DESIGN_SYSTEM.md`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next UI Redesign Phase
-- **UI Redesign Phase 2 — Design System and Tokens**: Create `docs/DESIGN_SYSTEM.md` establishing color tokens, glass surface elevations, typography scale, capacity rings, status badges, and loading skeletons without replacing business logic.
+- **UI Redesign Phase 3 — Shared Visual Shell & 3D Scene**: Implement responsive visual command center layout shell, brand mark, navigation tabs, and a restrained rotating 3D event orb / node constellation scene with WebGL fallback and reduced-motion support.

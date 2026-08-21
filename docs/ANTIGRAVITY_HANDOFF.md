@@ -12,6 +12,7 @@
 - **Capacity Lock Strategy**: Atomic Prisma transaction (`$transaction`) counting existing registrations under database lock before insertion; returns `409 EVENT_FULL` when `currentCount >= capacity`.
 - **Anti-Sharing QR Strategy**: Server-bound opaque token payload containing registration UUID, event ID, attendee ID, and salt; stored as SHA-256 hash (`qrTokenHash`). Rendered dynamically via Base64 SVG/PNG DataURLs. One-time consumption enforced upon check-in.
 - **Atomic Duplicate Check-In Strategy**: `CheckIn.registrationId UNIQUE` DB constraint + `$transaction` ensures that even across multiple parallel Node server processes, exactly 1 scan succeeds and all duplicate attempts return status `409 ALREADY_CHECKED_IN` with the original check-in timestamp.
+- **UI Architecture**: Dark navy futuristic campus command center theme, glassmorphism containers, responsive role-based navigation, explicit state notifications (`SUCCESS`, `DUPLICATE`, `FULL`, `INVALID_TOKEN`).
 
 ## 2. Completed Work
 - **Phase 0 (Discovery & Architecture Contract)**:
@@ -45,6 +46,13 @@
   - Built 100+ duplicate scan concurrency proof script (`scripts/concurrency-checkin.ts`).
   - Created concurrency proof documentation in `docs/CONCURRENCY_PROOF.md`.
   - Added automated unit test suite `tests/checkin.test.ts` (3/3 passed).
+- **Phase 6 (Functional Frontend User Flows)**:
+  - Installed `lucide-react`.
+  - Built `Header.tsx` (responsive role navigation & quick demo logins).
+  - Built `AuthModal.tsx` (login & registration modal).
+  - Built `OrganizerView.tsx` (event creation, metric cards, scanner console & duplicate feedback).
+  - Built `AttendeeView.tsx` (event discovery, 1-click registration & personal QR ticket cards).
+  - Integrated state & routes in `src/app/page.tsx`.
 
 ## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
@@ -56,20 +64,18 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 
 ## 4. Key Commands
 - **Development Server**: `cd orbit-check && npm run dev`
-- **Auth Unit Tests**: `cd orbit-check && npx tsx tests/auth.test.ts`
-- **Events Unit Tests**: `cd orbit-check && npx tsx tests/events.test.ts`
-- **QR Unit Tests**: `cd orbit-check && npx tsx tests/qr.test.ts`
-- **Check-In Unit Tests**: `cd orbit-check && npx tsx tests/checkin.test.ts`
-- **100+ Check-In Concurrency Proof**: `cd orbit-check && npx tsx scripts/concurrency-checkin.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
-- **Push Phase 5 to GitHub**: `git add . && git commit -m "Phase 5: Atomic Check-In Transaction and 100+ Duplicate Proof" && git push origin main`
+- **Push Phase 6 to GitHub**: `git add . && git commit -m "Phase 6: Functional Frontend User Flows" && git push origin main`
 
-## 5. Files Changed in Phase 5
-- `orbit-check/src/app/api/checkin/route.ts`
-- `orbit-check/scripts/concurrency-checkin.ts`
-- `orbit-check/tests/checkin.test.ts`
-- `docs/CONCURRENCY_PROOF.md`
+## 5. Files Changed in Phase 6
+- `orbit-check/package.json`
+- `orbit-check/package-lock.json`
+- `orbit-check/src/components/Header.tsx`
+- `orbit-check/src/components/AuthModal.tsx`
+- `orbit-check/src/components/OrganizerView.tsx`
+- `orbit-check/src/components/AttendeeView.tsx`
+- `orbit-check/src/app/page.tsx`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next Incomplete Phase
-- **Phase 6 — Functional Frontend User Flows**: Build the responsive React/HTML frontend views for both roles (Organizer scanner, event creation, live stats, Attendee ticket portal & registration).
+- **Phase 7 — Camera Scanning and Offline-First Outbox Sync**: Integrate live camera QR decoder library (`html5-qrcode`), browser webcam permissions, and IndexedDB outbox queue with client idempotency key for offline scan buffering and reconnect synchronization.

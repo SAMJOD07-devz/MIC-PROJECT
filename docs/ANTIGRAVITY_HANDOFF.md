@@ -15,6 +15,7 @@
 - **UI Architecture**: Dark navy futuristic campus command center theme, glassmorphism containers, responsive role-based navigation, explicit state notifications (`SUCCESS`, `DUPLICATE`, `FULL`, `INVALID_TOKEN`).
 - **Offline Outbox Architecture**: IndexedDB storage via `Dexie.js` storing scan events with client UUID idempotency keys (`idempotencyKey`), device ID, and timestamp. Reconnect auto-sync flushes to batch endpoint `/api/checkin/sync`. Server authority resolves Station A / Station B races cleanly.
 - **Live Operations & CSV Export Architecture**: Realtime live metrics (Capacity, Registered, Checked In, No-Show Count, Check-In Rate %, Peak Check-In Time calculation), modest auto-polling interval with WebSocket/SSE ready foundation, and secure organizer-only CSV roster export endpoint `GET /api/events/[id]/export`.
+- **AI Insights Architecture**: Ground-truth metric pre-computation via Prisma SQL injection, read-only LLM system prompt isolation, and deterministic rule-based fallback when LLM API keys are unconfigured/demo (`isFallback: true`).
 
 ## 2. Completed Work
 - **Phase 0 (Discovery & Architecture Contract)**:
@@ -59,10 +60,14 @@
   - Documented Station A / Station B race resolution in `docs/OFFLINE_SYNC.md`.
   - Added automated unit test suite `tests/offline-sync.test.ts` (3/3 passed).
 - **Phase 8 (Live Operations Dashboard & CSV Export)**:
-  - Built organizer CSV export endpoint `GET /api/events/[id]/export` with value escaping and role protection.
-  - Built live dashboard metrics endpoint `GET /api/events/[id]/dashboard` (computes check-in %, no-show count, peak check-in time, and attendee roster).
+  - Built organizer CSV export endpoint `GET /api/events/[id]/export`.
+  - Built live dashboard metrics endpoint `GET /api/events/[id]/dashboard`.
   - Updated `OrganizerView.tsx` with live metric cards and 1-click CSV download.
   - Added automated unit test suite `tests/dashboard-export.test.ts` (4/4 passed).
+- **Phase 9 (Server-Side AI Event Insights)**:
+  - Built organizer AI insights endpoint `POST /api/events/[id]/insights` with ground-truth pre-computation and deterministic rule-based fallback.
+  - Authored documentation in `docs/AI_INSIGHTS.md`.
+  - Added automated unit test suite `tests/ai-insights.test.ts` (3/3 passed).
 
 ## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
@@ -74,16 +79,15 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 
 ## 4. Key Commands
 - **Development Server**: `cd orbit-check && npm run dev`
-- **Dashboard & CSV Unit Tests**: `cd orbit-check && npx tsx tests/dashboard-export.test.ts`
+- **AI Insights Unit Tests**: `cd orbit-check && npx tsx tests/ai-insights.test.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
-- **Push Phase 8 to GitHub**: `git add . && git commit -m "Phase 8: Live Operations Dashboard and CSV Export" && git push origin main`
+- **Push Phase 9 to GitHub**: `git add . && git commit -m "Phase 9: Server-Side AI Event Insights" && git push origin main`
 
-## 5. Files Changed in Phase 8
-- `orbit-check/src/app/api/events/[id]/export/route.ts`
-- `orbit-check/src/app/api/events/[id]/dashboard/route.ts`
-- `orbit-check/src/components/OrganizerView.tsx`
-- `orbit-check/tests/dashboard-export.test.ts`
+## 5. Files Changed in Phase 9
+- `orbit-check/src/app/api/events/[id]/insights/route.ts`
+- `orbit-check/tests/ai-insights.test.ts`
+- `docs/AI_INSIGHTS.md`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next Incomplete Phase
-- **Phase 9 — Server-Side AI Event Insights**: Implement organizer-only natural language AI insight query endpoint (`POST /api/events/[id]/insights`) that pre-computes authoritative SQL metrics before calling OpenAI-compatible LLM, with plain deterministic statistics fallback on service failure.
+- **Phase 10 — 3D Visual Enhancement and Motion Layer**: Enhance visual presence with dynamic animated background canvas / CSS motion layer (orbiting particle nodes, glowing QR target frames, high-end futuristic dark mode aesthetics) while keeping critical UI text and interactive buttons in semantic HTML DOM.

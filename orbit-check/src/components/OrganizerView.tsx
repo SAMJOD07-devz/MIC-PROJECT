@@ -248,14 +248,16 @@ export function OrganizerView() {
     if (!selectedEvent) return;
     setAiLoading(true);
     try {
+      const q = question || customQuestion || "Analyze check-in velocity";
       const res = await fetch(`/api/events/${selectedEvent.id}/insights`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: question || customQuestion || "Analyze check-in velocity" }),
+        body: JSON.stringify({ query: q, prompt: q }),
       });
       const data = await res.json();
-      if (res.ok && data.insights) {
-        setAiInsight(data.insights);
+      const insightsObj = data.insights || (data.summary ? data : null);
+      if (res.ok && insightsObj) {
+        setAiInsight(insightsObj);
       }
     } catch (err) {
       console.error("AI Insights error:", err);
@@ -515,7 +517,7 @@ export function OrganizerView() {
                       disabled={aiLoading}
                       className="px-4 py-2 rounded-xl bg-[#e443b4] font-bold text-xs text-white hover:bg-[#7a54ff] transition cursor-pointer shrink-0"
                     >
-                      Query AI
+                      {aiLoading ? "Querying..." : "Query AI"}
                     </button>
                   </div>
 
@@ -528,7 +530,7 @@ export function OrganizerView() {
                       <p className="text-xs text-slate-200 leading-relaxed font-light">
                         {aiInsight.summary}
                       </p>
-                      {aiInsight.recommendations.length > 0 && (
+                      {aiInsight.recommendations && aiInsight.recommendations.length > 0 && (
                         <div className="pt-2 border-t border-white/10 space-y-1">
                           <span className="text-[9px] font-mono text-emerald-400 font-bold block">RECOMMENDATIONS:</span>
                           <ul className="list-disc list-inside text-xs text-slate-300 font-mono space-y-0.5">
@@ -584,7 +586,7 @@ export function OrganizerView() {
                 {/* Recent Check-Ins Table */}
                 {dashboardMetrics && dashboardMetrics.recentCheckIns.length > 0 && (
                   <div className="rounded-2xl border border-white/15 bg-white/5 p-5 space-y-3">
-                    <span className="text-[10px] font-mono text-slate-400 tracking-wider uppercase block">
+                    <span className="text-[10px] font-mono text-[#ffabdd] font-bold tracking-wider uppercase block">
                       RECENT GATE SCAN LOG
                     </span>
                     <div className="space-y-1.5">

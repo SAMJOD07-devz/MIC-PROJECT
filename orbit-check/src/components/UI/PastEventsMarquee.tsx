@@ -115,7 +115,11 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
   },
 ];
 
-export function PastEventsMarquee() {
+interface PastEventsMarqueeProps {
+  onRegister?: () => void;
+}
+
+export function PastEventsMarquee({ onRegister }: PastEventsMarqueeProps) {
   const [selectedEvent, setSelectedEvent] = useState<PastEventDetailed | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -136,28 +140,43 @@ export function PastEventsMarquee() {
 
   return (
     <>
-      <section className="paper-section py-16 overflow-hidden border-t border-b border-[#16151a]/15 bg-[#f0ede7]">
-        {/* Kinetic Editorial Section Header */}
-        <div className="container mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="mono-label text-[#827d87]">04 / VERIFIED TRACK RECORD</span>
-            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold text-[#16151a] tracking-tight mt-2">
-              Managed VITC Events.
-            </h2>
+      <section className="paper-section py-12 overflow-hidden border-t border-b border-[#16151a]/15 bg-[#f0ede7]">
+        {/* Section Header */}
+        <div className="container mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#e443b4] animate-pulse" />
+                <span className="font-mono text-[10px] font-bold tracking-widest text-[#827d87] uppercase">
+                  01 / CLUBS LIVE NOW &amp; PAST MANAGED EVENTS
+                </span>
+              </div>
+              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#16151a] tracking-tight">
+                VIT Chennai Campus Event Feed
+              </h2>
+            </div>
+            <p className="font-mono text-xs text-[#827d87] max-w-xs">
+              Hover to pause. Click any card to inspect winners, prize pools, and gate scan metrics.
+            </p>
           </div>
-          <p className="text-sm text-[#67626a] max-w-sm">
-            Click any event plate to view verified winners, prize money & student coordinator contacts.
-          </p>
         </div>
 
-        {/* Marquee Track */}
-        <div className="flex w-max">
+        {/* Endless Marquee Loop Track */}
+        <div
+          className="relative w-full flex overflow-hidden cursor-pointer py-2"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => {
+            if (!isModalOpen) setIsPaused(false);
+          }}
+        >
           <motion.div
-            className="flex space-x-6 pr-6"
-            animate={{ x: isPaused ? undefined : ['0%', '-50%'] }}
+            className="flex gap-6 shrink-0"
+            animate={{
+              x: isPaused ? undefined : ['0%', '-50%'],
+            }}
             transition={{
               ease: 'linear',
-              duration: 32,
+              duration: 35,
               repeat: Infinity,
             }}
           >
@@ -166,16 +185,19 @@ export function PastEventsMarquee() {
                 key={`${item.id}-${index}`}
                 onClick={() => handleCardClick(item)}
                 onMouseEnter={playHoverSFX}
-                className="w-80 shrink-0 relative bg-[#fffdf9] border border-[#16151a]/15 p-6 transition-transform duration-300 hover:-translate-y-2 cursor-pointer flex flex-col justify-between"
-                style={{
-                  borderTop: index % 4 === 0 ? '3px solid #e443b4' : index % 4 === 1 ? '3px solid #4b79ff' : index % 4 === 2 ? '3px solid #f06f48' : '3px solid #16151a'
-                }}
+                className="w-80 sm:w-96 rounded-2xl border border-[#16151a]/15 bg-[#fffdf9] p-5 shadow-xs transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-[#e443b4] shrink-0 flex flex-col justify-between relative overflow-hidden"
               >
-                {/* Header Meta */}
+                {/* Colored Top Accent Bar per Fest */}
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${item.gradient}`} />
+
                 <div>
-                  <div className="flex justify-between items-center text-[10px] font-mono text-[#827d87] uppercase tracking-wider mb-3">
-                    <span>{item.category}</span>
-                    <span className="font-bold text-[#e443b4]">{item.badge}</span>
+                  <div className="flex justify-between items-start gap-2 mb-3">
+                    <span className="text-[9px] font-mono font-bold tracking-wider text-[#e443b4] uppercase bg-[#e443b4]/10 border border-[#e443b4]/20 px-2.5 py-0.5 rounded-full">
+                      {item.badge}
+                    </span>
+                    <span className="text-[10px] font-mono text-[#827d87] font-medium">
+                      {item.category}
+                    </span>
                   </div>
 
                   <h3 className="font-heading text-xl font-extrabold text-[#16151a] leading-tight mb-2">
@@ -203,7 +225,7 @@ export function PastEventsMarquee() {
                       {item.date}
                     </span>
                     <span className="font-bold text-[#16151a] flex items-center gap-1">
-                      Details <ArrowUpRight className="w-3 h-3 text-[#e443b4]" />
+                      Inspect <ArrowUpRight className="w-3 h-3 text-[#e443b4]" />
                     </span>
                   </div>
                 </div>
@@ -218,6 +240,7 @@ export function PastEventsMarquee() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         event={selectedEvent}
+        onRegister={onRegister}
       />
     </>
   );

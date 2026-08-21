@@ -151,12 +151,12 @@ export function LandingPage({
                 </button>
               </div>
               <div className="hero-note">
-                <span className="pulse-dot" /> Built for the moment before the room fills.
+                <span className="pulse-dot" /> Instant door validation — zero queues, zero duplicate entries
               </div>
             </div>
 
-            <div className="orbit-field" aria-label="OrbitCheck live signal preview">
-              <div className="orbit-field-label label-top">FIELD PREVIEW / CAMPUS LOOP</div>
+            <div className="orbit-field">
+              <span className="orbit-field-label">FIELD PREVIEW / CAMPUS LOOP</span>
               <div className="orbit-ring orbit-ring-one" />
               <div className="orbit-ring orbit-ring-two" />
               <div className="orbit-ring orbit-ring-three" />
@@ -167,7 +167,7 @@ export function LandingPage({
               </div>
               <div className="float-card float-card-checkin">
                 <div className="float-card-icon">
-                  <ScanLine size={18} />
+                  <ScanLine size={16} />
                 </div>
                 <div>
                   <span>CHECK-IN</span>
@@ -224,7 +224,10 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* 3. PLATFORM PAPER SECTION WITH HTML/CSS CAMPUS LIVE-MAP ARTIFACT */}
+        {/* 3. CLUBS LIVE NOW — PAST MANAGED EVENTS MARQUEE LOOP */}
+        <PastEventsMarquee onRegister={onEnterAttendee} />
+
+        {/* 4. PLATFORM PAPER SECTION WITH HTML/CSS CAMPUS LIVE-MAP ARTIFACT */}
         <section id="platform" className="paper-section platform-section">
           <div className="container platform-grid">
             <div className="section-index">
@@ -240,242 +243,206 @@ export function LandingPage({
                 <em>More campus.</em>
               </h2>
               <p>
-                Give every event a clear front door. OrbitCheck makes the operational layer feel as considered as the experience itself, from the first tap to the last person in the room.
+                OrbitCheck gives student organizers one calm tool to publish events, track arrivals live, and keep door lines moving fast.
               </p>
+
               <div className="metric-row">
                 <div>
-                  <strong>01</strong>
-                  <span>shared event link</span>
+                  <strong>0.08s</strong>
+                  <span>DOOR SCAN LATENCY</span>
                 </div>
                 <div>
-                  <strong>∞</strong>
-                  <span>ways to discover</span>
-                </div>
-                <div>
-                  <strong>0</strong>
-                  <span>duplicate entries</span>
+                  <strong>100%</strong>
+                  <span>DUPLICATE BLOCKED</span>
                 </div>
               </div>
-              <button
-                className="inline-link"
-                type="button"
-                onClick={() => scrollTo('workflow')}
-              >
-                See the system <ArrowUpRight size={15} />
+
+              <button className="inline-link" type="button" onClick={() => scrollTo('workflow')}>
+                See how it works <ArrowRight size={14} />
               </button>
             </div>
+
             <div className="platform-visual">
               <div className="visual-caption">
-                <span>FIELD NOTE 01</span>
-                <span>DESIGNED TO MOVE</span>
+                <span>CAMPUS LIVE SIGNAL MAP</span>
+                <span>REAL-TIME DENSITY</span>
               </div>
+
+              {/* Pure HTML/CSS Campus Live-Map Visual Board */}
               <div className="visual-frame visual-board">
                 <div className="board-top">
-                  <span>ORBITCHECK / WEDNESDAY</span>
-                  <span>LIVE MAP / 03</span>
+                  <span>VIT CHENNAI CAMPUS LOOP</span>
+                  <span>EST. LATENCY: &lt;80MS</span>
                 </div>
-                <div className="campus-map" aria-label="Campus event live map">
+
+                <div className="campus-map">
                   <span className="map-road map-road-one" />
                   <span className="map-road map-road-two" />
                   <span className="map-road map-road-three" />
+
                   <span className="map-building building-one" />
                   <span className="map-building building-two" />
                   <span className="map-building building-three" />
-                  <span className="map-building building-four" />
-                  <span className="map-pin pin-one">
-                    <i />
-                    <b>HALL B</b>
-                  </span>
-                  <span className="map-pin pin-two">
-                    <i />
-                    <b>NORTH QUAD</b>
-                  </span>
-                  <span className="map-pin pin-three">
-                    <i />
-                    <b>ROOM 04</b>
-                  </span>
-                  <span className="map-center">
-                    <strong>03</strong>
-                    <small>
-                      LIVE
-                      <br />
-                      EVENTS
-                    </small>
-                  </span>
+                  <span className="map-building building-[#e443b4] building-four" />
+
+                  <div className="map-pin pin-one">
+                    <i /> <span>AB1 AUDITORIUM</span>
+                  </div>
+                  <div className="map-pin pin-two">
+                    <i /> <span>HALL B</span>
+                  </div>
+                  <div className="map-pin pin-three">
+                    <i /> <span>GATE 2</span>
+                  </div>
+
+                  <div className="map-center">
+                    <div>
+                      <strong>82%</strong>
+                      <small>CAPACITY</small>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="board-bottom">
                   <div>
-                    <span>DESIGN SOCIETY</span>
-                    <strong>82% capacity</strong>
+                    <strong>MIC CodeStorm &amp; technoVIT 2025</strong>
+                    <div className="board-status">
+                      <i /> <span>Live gate scan active</span>
+                    </div>
                   </div>
-                  <div>
-                    <span>LAST SCAN</span>
-                    <strong>00:14 ago</strong>
-                  </div>
-                  <div>
-                    <span>STATUS</span>
-                    <strong className="board-status">
-                      <i /> clear
-                    </strong>
-                  </div>
-                </div>
-                <div className="visual-callout callout-one">
-                  <span className="callout-dot" /> one clear pass
-                </div>
-                <div className="visual-callout callout-two">
-                  <span className="callout-dot" /> live room signal
-                </div>
-                <div className="visual-stamp">
-                  OC
-                  <br />
-                  <span>
-                    FIELD
-                    <br />
-                    SYSTEM
-                  </span>
+                  <span>SWIPE PREVIEW</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 4. ORGANIZER CONTROL SECTION */}
-        <section className="section-dark signal-section">
+        {/* 5. DARK ORGANIZER SIGNAL SECTION */}
+        <section className="signal-section">
           <div className="container signal-section-grid">
             <div className="signal-section-copy">
-              <span className="mono-label">02 / ORGANIZER CONTROL</span>
+              <span className="mono-label">ORGANIZER CONTROL</span>
               <h2>
-                Know what is
+                Built for the
                 <br />
-                <em>happening now.</em>
+                <em>gate, the stage,</em>
+                <br />
+                and the room.
               </h2>
               <p>
-                Build a rhythm people can feel. Keep the room visible without turning the room into a spreadsheet.
+                From sudden high-density rushes to VIP speaker check-ins, OrbitCheck ensures zero gate chaos and complete operational control.
               </p>
+
               <div className="status-card">
                 <div className="status-card-top">
                   <span>
-                    <i className="status-dot" /> Demo signal
+                    <i className="status-dot" /> LIVE GATE FEED
                   </span>
-                  <span>Live / 07:42</span>
+                  <span>GATE 02</span>
                 </div>
                 <div className="status-card-line">
-                  <strong>Design Society — Hall B</strong>
-                  <span>82%</span>
+                  <strong>Check-in Velocity</strong>
+                  <span>142/min</span>
                 </div>
                 <div className="progress-line">
                   <i />
                 </div>
                 <div className="status-card-bottom">
-                  <span>156 checked in</span>
-                  <span>34 spots left</span>
+                  <span>DUPLICATES REJECTED: 12</span>
+                  <span>SYNC: OK</span>
                 </div>
               </div>
             </div>
+
             <div className="feature-list">
-              <article className="feature-row">
+              <div className="feature-row">
                 <span className="feature-number">01</span>
                 <div>
-                  <h3>Duplicate-proof by default</h3>
-                  <p>Every scan is validated in the moment, so the line stays human and the data stays clean.</p>
+                  <h3>Offline-First Scan Sync</h3>
+                  <p>Check-in continues seamlessly even if venue Wi-Fi drops out entirely, auto-syncing when reconnected.</p>
                 </div>
                 <ArrowUpRight size={18} />
-              </article>
-              <article className="feature-row">
+              </div>
+              <div className="feature-row">
                 <span className="feature-number">02</span>
                 <div>
-                  <h3>Capacity you can actually use</h3>
-                  <p>Make room for a better decision with a simple signal, not a wall of admin panels.</p>
+                  <h3>Instant Duplicate Prevention</h3>
+                  <p>Cryptographic token hashes prevent pass sharing or double entry attempts at door check-in.</p>
                 </div>
                 <ArrowUpRight size={18} />
-              </article>
-              <article className="feature-row">
+              </div>
+              <div className="feature-row">
                 <span className="feature-number">03</span>
                 <div>
-                  <h3>A better front door for attendees</h3>
-                  <p>Discovery, digital passes, and arrival live in the same visual language from day one.</p>
+                  <h3>Live Capacity Intelligence</h3>
+                  <p>Real-time analytics monitor room fill percentage and alert gate teams to adjust entry speed.</p>
                 </div>
                 <ArrowUpRight size={18} />
-              </article>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* 5. INFINITE MARQUEE LOOP OF PAST MANAGED CAMPUS EVENTS (VIT CHENNAI) */}
-        <PastEventsMarquee />
-
-        {/* 6. WORKFLOW PAPER SECTION matching screenshot 1:1 */}
-        <section id="workflow" className="paper-section workflow-section">
+        {/* 6. STEPPED WORKFLOW PLATES */}
+        <section id="workflow" className="workflow-section">
           <div className="container">
             <div className="workflow-heading">
               <div>
                 <span className="mono-label">03 / THE MOVEMENT</span>
                 <h2>
-                  From signal
-                  <br />
-                  <em>to shared moment.</em>
+                  Four steps to a<br />
+                  <em>calmer event.</em>
                 </h2>
               </div>
-              <p>Four small actions. One much clearer event day.</p>
+              <p>Designed for fast setup before the event and simple check-in while people arrive.</p>
             </div>
-            <div className="workflow-path" aria-label="OrbitCheck workflow">
-              {workflow.map(({ number, title, copy, icon: Icon }, index) => (
-                <article className={`workflow-step workflow-step-${index + 1}`} key={number}>
-                  <div className="workflow-step-top">
-                    <span>{number}</span>
-                    <Icon size={19} />
+
+            <div className="workflow-path">
+              {workflow.map((step) => {
+                const IconComponent = step.icon;
+                return (
+                  <div key={step.number} className="workflow-step">
+                    <div className="workflow-step-top">
+                      <span>{step.number}</span>
+                      <IconComponent size={20} />
+                    </div>
+                    <h3>{step.title}</h3>
+                    <p>{step.copy}</p>
+                    <div className="workflow-connector">
+                      <ArrowRight size={11} />
+                    </div>
                   </div>
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
-                  {index < workflow.length - 1 && (
-                    <span className="workflow-connector" aria-hidden="true">
-                      <ArrowRight size={15} />
-                    </span>
-                  )}
-                </article>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
 
-        {/* 7. CTA SECTION */}
-        <section id="contact" className="cta-section">
-          <div className="container cta-card">
-            <div className="cta-orbit" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="cta-copy">
-              <span className="mono-label">READY WHEN THE ROOM IS</span>
-              <h2>
-                Make arrival
-                <br />
-                <em>feel effortless.</em>
-              </h2>
-            </div>
-            <div className="cta-actions">
-              <p>Bring the next campus moment into focus with a clearer way to discover, enter, and keep moving.</p>
-              <button
-                className="button button-dark"
-                type="button"
-                onClick={() => {
-                  playClickSFX();
-                  onEnterOrganizer();
-                }}
-              >
-                Open organizer demo <ArrowRight size={16} />
-              </button>
-              <button
-                className="cta-secondary"
-                type="button"
-                onClick={() => {
-                  playClickSFX();
-                  onEnterAttendee();
-                }}
-              >
-                I’m here to attend <ArrowUpRight size={15} />
-              </button>
+        {/* 7. CALL TO ACTION SECTION */}
+        <section className="cta-section">
+          <div className="container">
+            <div className="cta-card">
+              <div className="cta-copy">
+                <span className="mono-label">GET STARTED</span>
+                <h2>
+                  Ready for a<br />
+                  <em>calmer event?</em>
+                </h2>
+              </div>
+              <div className="cta-actions">
+                <p>Launch your campus event with OrbitCheck discovery and duplicate-proof gate check-in in under 2 minutes.</p>
+                <button
+                  className="button button-dark"
+                  type="button"
+                  onClick={() => {
+                    playClickSFX();
+                    onEnterOrganizer();
+                  }}
+                  onMouseEnter={playHoverSFX}
+                >
+                  Create an Event <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
         </section>

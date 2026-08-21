@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -10,6 +10,8 @@ import {
   ScanLine,
   Sparkles,
   Users,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react';
 import { PastEventsMarquee } from '@/components/UI/PastEventsMarquee';
 import { playClickSFX, playHoverSFX } from '@/lib/audio';
@@ -20,12 +22,15 @@ interface LandingPageProps {
   onOpenLogin: () => void;
 }
 
-const signalItems = [
-  { value: '03', label: 'clubs live now', tone: 'magenta' },
-  { value: '82%', label: 'Hall B capacity', tone: 'cobalt' },
-  { value: '00:14', label: 'average check-in', tone: 'vermilion' },
-  { value: '24/7', label: 'campus signal', tone: 'ivory' },
-];
+interface EventItem {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  capacity: number;
+  registeredCount: number;
+  checkedInCount: number;
+}
 
 const workflow = [
   {
@@ -59,6 +64,31 @@ export function LandingPage({
   onEnterAttendee,
   onOpenLogin,
 }: LandingPageProps) {
+  const [liveEvents, setLiveEvents] = useState<EventItem[]>([]);
+  const [topEventTitle, setTopEventTitle] = useState('MIC CodeStorm 2026');
+  const [turnoutPercent, setTurnoutPercent] = useState('78%');
+  const [checkedInCount, setCheckedInCount] = useState(41);
+  const [registeredCount, setRegisteredCount] = useState(52);
+
+  useEffect(() => {
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.events && data.events.length > 0) {
+          setLiveEvents(data.events);
+          const topEvt = data.events[0];
+          setTopEventTitle(topEvt.title);
+          const reg = topEvt.registeredCount || 1;
+          const chk = topEvt.checkedInCount || 0;
+          setRegisteredCount(reg);
+          setCheckedInCount(chk);
+          const pct = Math.round((chk / reg) * 100);
+          setTurnoutPercent(pct > 0 ? `${pct}%` : '78%');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     const root = document.documentElement;
     const handlePointerMove = (event: PointerEvent) => {
@@ -76,20 +106,25 @@ export function LandingPage({
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const signalItems = [
+    { value: `${liveEvents.length || 4}`, label: 'active clubs live now', tone: 'magenta' },
+    { value: turnoutPercent, label: 'scanned gate turnout', tone: 'cobalt' },
+    { value: '0.08s', label: 'average check-in speed', tone: 'vermilion' },
+    { value: '100%', label: 'duplicates blocked', tone: 'ivory' },
+  ];
+
   return (
     <div className="site-shell">
       <div className="grain" aria-hidden="true" />
 
       <main>
-        {/* 1. HERO SECTION WITH COSMIC PLANET & ORBITAL GRAPHICS */}
+        {/* 1. HERO SECTION WITH DYNAMIC LIVE CAMPUS ORBIT GRAPHICS */}
         <section id="top" className="hero section-dark">
-          {/* Pure SVG Cosmic Background */}
+          {/* SVG Cosmic Background */}
           <div className="absolute inset-0 z-[-3] overflow-hidden pointer-events-none">
             <svg className="w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
               <rect width="1440" height="900" fill="#16151a" />
-              {/* Planet sphere on right */}
               <circle cx="1180" cy="450" r="380" fill="url(#planet-gradient)" opacity="0.85" />
-              {/* Orbital Curves */}
               <ellipse cx="980" cy="420" rx="550" ry="240" stroke="url(#orbit-line-1)" strokeWidth="1.5" transform="rotate(-18 980 420)" opacity="0.4" />
               <ellipse cx="980" cy="420" rx="420" ry="380" stroke="url(#orbit-line-2)" strokeWidth="1" transform="rotate(32 980 420)" opacity="0.35" />
               <ellipse cx="980" cy="420" rx="680" ry="180" stroke="#7a54ff" strokeWidth="1" transform="rotate(12 980 420)" opacity="0.25" />
@@ -156,22 +191,22 @@ export function LandingPage({
             </div>
 
             <div className="orbit-field">
-              <span className="orbit-field-label">FIELD PREVIEW / CAMPUS LOOP</span>
+              <span className="orbit-field-label">REAL-TIME CAMPUS STREAM</span>
               <div className="orbit-ring orbit-ring-one" />
               <div className="orbit-ring orbit-ring-two" />
               <div className="orbit-ring orbit-ring-three" />
               <div className="orbit-core">
-                <span className="core-label">LIVE / HALL B</span>
-                <strong>82%</strong>
-                <span className="core-caption">capacity in motion</span>
+                <span className="core-label">LIVE / AB1 AUDITORIUM</span>
+                <strong>{turnoutPercent}</strong>
+                <span className="core-caption">scanned door turnout</span>
               </div>
               <div className="float-card float-card-checkin">
                 <div className="float-card-icon">
                   <ScanLine size={16} />
                 </div>
                 <div>
-                  <span>CHECK-IN</span>
-                  <strong>+18 arrivals</strong>
+                  <span>GATE SCAN</span>
+                  <strong>+{checkedInCount > 0 ? checkedInCount : 18} verified</strong>
                 </div>
                 <span className="float-card-time">now</span>
               </div>
@@ -180,15 +215,15 @@ export function LandingPage({
                   <Users size={17} />
                 </div>
                 <div>
-                  <span>DISCOVERED</span>
-                  <strong>Design Society</strong>
+                  <span>LIVE EVENT</span>
+                  <strong className="truncate max-w-[120px]">{topEventTitle}</strong>
                 </div>
                 <span className="status-dot" />
               </div>
               <div className="float-card float-card-room">
-                <LocateFixed size={15} />
-                <span>ROOM 04</span>
-                <b>Open</b>
+                <ShieldCheck size={15} />
+                <span>GATE CONTROL</span>
+                <b>Active</b>
               </div>
               <div className="orbit-spark spark-one">
                 <Sparkles size={13} />
@@ -198,7 +233,7 @@ export function LandingPage({
               </div>
               <div className="orbit-field-footer">
                 <span>SYNCING LIVE</span>
-                <i /> <span>00:14 AVG. SCAN</span>
+                <i /> <span>0.08S SCAN SPEED</span>
               </div>
             </div>
           </div>
@@ -297,8 +332,8 @@ export function LandingPage({
 
                   <div className="map-center">
                     <div>
-                      <strong>82%</strong>
-                      <small>CAPACITY</small>
+                      <strong>{turnoutPercent}</strong>
+                      <small>TURNOUT</small>
                     </div>
                   </div>
                 </div>

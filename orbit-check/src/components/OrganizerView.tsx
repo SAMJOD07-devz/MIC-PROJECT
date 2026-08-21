@@ -43,6 +43,8 @@ interface DashboardMetrics {
   checkedInCount: number;
   remainingCapacity: number;
   noShowCount: number;
+  pendingArrivals?: number;
+  eventHasStarted?: boolean;
   checkInPercentage: number;
   peakCheckInTime: string;
   recentCheckIns: Array<{
@@ -456,9 +458,11 @@ export function OrganizerView() {
                     </div>
 
                     <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-3.5 space-y-1">
-                      <span className="text-[9px] font-mono text-rose-300 uppercase tracking-wider block">NO-SHOWS</span>
+                      <span className="text-[9px] font-mono text-rose-300 uppercase tracking-wider block">
+                        {dashboardMetrics.eventHasStarted ? "NO-SHOWS" : "PENDING ARRIVALS"}
+                      </span>
                       <strong className="font-heading text-2xl font-extrabold text-rose-400 block">
-                        {dashboardMetrics.noShowCount}
+                        {dashboardMetrics.eventHasStarted ? dashboardMetrics.noShowCount : (dashboardMetrics.pendingArrivals ?? 0)}
                       </strong>
                     </div>
 

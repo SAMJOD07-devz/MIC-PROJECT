@@ -257,7 +257,10 @@ export function getDashboardMetrics(eventId: string) {
 
   const eventCheckIns = db.checkIns.filter((c) => c.eventId === eventId);
   const checkInPercentage = event.registeredCount > 0 ? Math.round((event.checkedInCount / event.registeredCount) * 1000) / 10 : 0;
-  const noShowCount = Math.max(0, event.registeredCount - event.checkedInCount);
+  
+  const eventHasStarted = new Date() >= new Date(event.date) || event.checkedInCount > 0;
+  const noShowCount = eventHasStarted ? Math.max(0, event.registeredCount - event.checkedInCount) : 0;
+  const pendingArrivals = Math.max(0, event.registeredCount - event.checkedInCount);
 
   return {
     eventId: event.id,
@@ -267,6 +270,8 @@ export function getDashboardMetrics(eventId: string) {
     checkedInCount: event.checkedInCount,
     remainingCapacity: event.remainingCapacity,
     noShowCount,
+    pendingArrivals,
+    eventHasStarted,
     checkInPercentage,
     peakCheckInTime: eventCheckIns.length > 0 ? new Date(eventCheckIns[0].checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "N/A",
     recentCheckIns: eventCheckIns.slice(0, 10),

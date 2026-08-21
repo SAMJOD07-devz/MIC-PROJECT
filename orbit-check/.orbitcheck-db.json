@@ -1,0 +1,68 @@
+{
+  "events": [
+    {
+      "id": "evt-demo-1",
+      "title": "MIC Tech Summit & Recruitment 2026",
+      "description": "Join top engineering teams for technical keynotes, coding challenges, and recruiter check-in.",
+      "date": "2026-08-22T15:52:08.407Z",
+      "capacity": 50,
+      "registeredCount": 3,
+      "checkedInCount": 1,
+      "remainingCapacity": 47,
+      "isFull": false,
+      "organizer": {
+        "id": "org-demo-1",
+        "name": "Campus Organizer Admin",
+        "email": "organizer@vitstudent.ac.in"
+      }
+    },
+    {
+      "id": "evt-demo-2",
+      "title": "AI Agentic Development Workshop",
+      "description": "Hands-on session building autonomous coding agents and real-time event infrastructure.",
+      "date": "2026-08-23T15:52:08.407Z",
+      "capacity": 30,
+      "registeredCount": 30,
+      "checkedInCount": 15,
+      "remainingCapacity": 0,
+      "isFull": true,
+      "organizer": {
+        "id": "org-demo-1",
+        "name": "Campus Organizer Admin",
+        "email": "organizer@vitstudent.ac.in"
+      }
+    },
+    {
+      "id": "evt-demo-3",
+      "title": "MIC CodeStorm 2026",
+      "description": "24-hour flagship hackathon focusing on AI Agents, Web3 Infra, and Campus Tech Solutions.",
+      "date": "2026-08-24T15:52:08.407Z",
+      "capacity": 100,
+      "registeredCount": 12,
+      "checkedInCount": 0,
+      "remainingCapacity": 88,
+      "isFull": false,
+      "organizer": {
+        "id": "org-demo-1",
+        "name": "Campus Organizer Admin",
+        "email": "organizer@vitstudent.ac.in"
+      }
+    }
+  ],
+  "tickets": [
+    {
+      "id": "tkt-demo-1",
+      "eventId": "evt-demo-1",
+      "eventTitle": "MIC Tech Summit & Recruitment 2026",
+      "eventDescription": "Join top engineering teams for technical keynotes, coding challenges, and recruiter check-in.",
+      "eventDate": "2026-08-22T15:52:08.407Z",
+      "attendeeId": "att-demo-1",
+      "attendeeEmail": "attendee1@vitstudent.ac.in",
+      "qrToken": "ORBIT-REG-DEMO-att-demo-1-EVT1",
+      "qrTokenHash": "a6ed419872c0ea599220cf5141f1ac0a32b1a398e500ae169934126aca6a4b96",
+      "status": "REGISTERED",
+      "registeredAt": "2026-08-21T15:52:08.407Z"
+    }
+  ],
+  "checkIns": []
+}

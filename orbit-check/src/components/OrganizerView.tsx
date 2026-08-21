@@ -132,7 +132,7 @@ export function OrganizerView() {
       }
     } catch (err) {
       console.error("Fetch events error:", err);
-    } fontinally: {
+    } finally {
       if (showInitialSpinner) setLoading(false);
     }
   }
@@ -178,7 +178,13 @@ export function OrganizerView() {
       setDescription("");
       setDate("");
       setCapacity(50);
-      fetchEvents(true);
+
+      // Select newly created event immediately
+      if (data.event) {
+        setSelectedEvent(data.event);
+        fetchDashboardMetrics(data.event.id);
+      }
+      fetchEvents(false);
     } catch (err) {
       alert("Network error creating event");
     } finally {

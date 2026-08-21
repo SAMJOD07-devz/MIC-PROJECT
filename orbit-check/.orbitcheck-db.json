@@ -47,6 +47,22 @@
         "name": "Campus Organizer Admin",
         "email": "organizer@vitstudent.ac.in"
       }
+    },
+    {
+      "title": "mic - 2",
+      "description": "mic 2",
+      "date": "2026-08-28T15:56:00.000Z",
+      "capacity": 50,
+      "organizer": {
+        "id": "org-demo-2",
+        "name": "Campus Organizer Admin",
+        "email": "organizer@orbitcheck.com"
+      },
+      "id": "evt-1787327784166",
+      "registeredCount": 0,
+      "checkedInCount": 0,
+      "remainingCapacity": 50,
+      "isFull": false
     }
   ],
   "tickets": [

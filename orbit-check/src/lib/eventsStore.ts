@@ -151,7 +151,8 @@ export function addEvent(event: Omit<StoredEvent, "id" | "registeredCount" | "ch
     remainingCapacity: event.capacity,
     isFull: false,
   };
-  db.events.push(newEvent);
+  // Insert at beginning so newly created events appear FIRST in lists
+  db.events.unshift(newEvent);
   writeDB(db);
   return newEvent;
 }

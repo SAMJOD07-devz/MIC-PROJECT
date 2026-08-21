@@ -94,11 +94,10 @@ export function Header({
                 setActiveTab("events");
               }}
               onMouseEnter={playHoverSFX}
-              className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                activeTab === "events"
+              className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${activeTab === "events"
                   ? "bg-[#e443b4] text-white font-bold"
                   : "text-slate-300 hover:text-white hover:bg-white/10"
-              }`}
+                }`}
             >
               <Calendar className="h-4 w-4" />
               Discover Events
@@ -111,11 +110,10 @@ export function Header({
                   setActiveTab("tickets");
                 }}
                 onMouseEnter={playHoverSFX}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                  activeTab === "tickets"
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${activeTab === "tickets"
                     ? "bg-[#e443b4] text-white font-bold"
                     : "text-slate-300 hover:text-white hover:bg-white/10"
-                }`}
+                  }`}
               >
                 <Ticket className="h-4 w-4" />
                 My QR Tickets
@@ -130,11 +128,10 @@ export function Header({
                     setActiveTab("organizer");
                   }}
                   onMouseEnter={playHoverSFX}
-                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                    activeTab === "organizer"
+                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${activeTab === "organizer"
                       ? "bg-[#e443b4] text-white font-bold"
                       : "text-slate-300 hover:text-white hover:bg-white/10"
-                  }`}
+                    }`}
                 >
                   <ShieldCheck className="h-4 w-4" />
                   Console Metrics
@@ -146,11 +143,10 @@ export function Header({
                     setActiveTab("scanner");
                   }}
                   onMouseEnter={playHoverSFX}
-                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-                    activeTab === "scanner"
+                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${activeTab === "scanner"
                       ? "bg-[#e443b4] text-white font-bold"
                       : "text-slate-300 hover:text-white hover:bg-white/10"
-                  }`}
+                    }`}
                 >
                   <QrCode className="h-4 w-4" />
                   Webcam Scanner

@@ -119,7 +119,7 @@ export function LandingPage({
       <div className="grain" aria-hidden="true" />
 
       <main>
-        {/* 1. HERO SECTION WITH CREATOR PROOF BADGE */}
+        {/* 1. HERO SECTION WITH EVENTSMANAGER BRANDING & CREATOR PROOF */}
         <section id="top" className="hero section-dark">
           {/* SVG Cosmic Background */}
           <div className="absolute inset-0 z-[-3] overflow-hidden pointer-events-none">
@@ -163,7 +163,7 @@ export function LandingPage({
                 Make every <em>arrival</em> count.
               </h1>
               <p className="hero-lede">
-                OrbitCheck brings discovery, registration, and duplicate-proof check-in into one calm, live layer for campus life.
+                EventsManager brings discovery, registration, and duplicate-proof check-in into one calm, live layer for campus life.
               </p>
               <div className="hero-actions">
                 <button
@@ -282,7 +282,7 @@ export function LandingPage({
                 <em>More campus.</em>
               </h2>
               <p>
-                OrbitCheck gives student organizers one calm tool to publish events, track arrivals live, and keep door lines moving fast.
+                EventsManager gives student organizers one calm tool to publish events, track arrivals live, and keep door lines moving fast.
               </p>
 
               <div className="metric-row">
@@ -369,7 +369,7 @@ export function LandingPage({
                 and the room.
               </h2>
               <p>
-                From sudden high-density rushes to VIP speaker check-ins, OrbitCheck ensures zero gate chaos and complete operational control.
+                From sudden high-density rushes to VIP speaker check-ins, EventsManager ensures zero gate chaos and complete operational control.
               </p>
 
               <div className="status-card">
@@ -469,7 +469,7 @@ export function LandingPage({
                 </h2>
               </div>
               <div className="cta-actions">
-                <p>Launch your campus event with OrbitCheck discovery and duplicate-proof gate check-in in under 2 minutes.</p>
+                <p>Launch your campus event with EventsManager discovery and duplicate-proof gate check-in in under 2 minutes.</p>
                 <button
                   className="button button-dark"
                   type="button"
@@ -487,15 +487,15 @@ export function LandingPage({
         </section>
       </main>
 
-      {/* 8. FOOTER WITH CREATOR SIGNATURE PROOF */}
+      {/* 8. FOOTER WITH EVENTSMANAGER BRANDING & CREATOR SIGNATURE */}
       <footer className="footer section-dark">
         <div className="container footer-top">
           <button className="brand footer-brand" type="button" onClick={() => scrollTo('top')}>
             <span className="brand-mark">
-              <span>O</span>
+              <span>E</span>
             </span>
             <span className="brand-wordmark">
-              Orbit<span>Check</span>
+              Events<span>Manager</span>
               <small>Campus events / check-in</small>
             </span>
           </button>
@@ -522,7 +522,7 @@ export function LandingPage({
           </div>
         </div>
         <div className="container footer-bottom">
-          <span>© 2026 OrbitCheck — Engineered &amp; Built by Saumya Pandya (MIC VITC)</span>
+          <span>© 2026 EventsManager — Engineered &amp; Built by Saumya Pandya (MIC VITC)</span>
           <span>
             System status <i className="status-dot" /> All signals clear
           </span>

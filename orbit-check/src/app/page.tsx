@@ -7,7 +7,6 @@ import { LandingPage } from "@/components/LandingPage";
 import { OrganizerView } from "@/components/OrganizerView";
 import { AttendeeView } from "@/components/AttendeeView";
 import { CameraScanner } from "@/components/CameraScanner";
-import { MotionBackground } from "@/components/MotionBackground";
 
 interface SessionUser {
   id: string;
@@ -87,10 +86,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white">
-      {/* 3D Motion Vector Node Mesh Canvas */}
-      <MotionBackground />
-
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       {/* Navigation Header */}
       <Header
         user={user}
@@ -104,8 +100,9 @@ export default function HomePage() {
       {/* Main Content Area */}
       <main className="flex-1 mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8 relative z-10">
         {loading ? (
-          <div className="flex items-center justify-center min-h-[50vh] text-xs text-slate-400">
-            Loading OrbitCheck System...
+          <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-slate-500">
+            <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-medium">Loading OrbitCheck System...</span>
           </div>
         ) : (
           <>
@@ -141,24 +138,25 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-6 text-center text-xs text-slate-500 relative z-10 backdrop-blur-sm">
+      <footer className="border-t border-slate-200 bg-white/80 py-6 text-center text-xs text-slate-600 relative z-10 backdrop-blur-sm shadow-xs">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span
               onClick={() => setActiveTab(user ? (user.role === "ORGANIZER" ? "organizer" : "events") : "landing")}
-              className="font-bold text-slate-400 cursor-pointer hover:text-white transition"
+              className="font-bold text-slate-800 cursor-pointer hover:text-indigo-600 transition"
             >
               OrbitCheck System
             </span>
             <span>— MIC Campus Event Command Center</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px] text-slate-500">
-            <span>Server Concurrency Protected</span>
+          <div className="flex items-center gap-4 text-[11px] text-slate-500 font-medium">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Concurrency Protected</span>
             <span>•</span>
-            <span>IndexedDB Offline Outbox</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> IndexedDB Sync</span>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+

@@ -239,22 +239,22 @@ export function OrganizerView() {
   return (
     <div className="space-y-6">
       {/* Console Banner */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-extrabold text-white">Organizer Command Console</h1>
-            <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-400 border border-indigo-500/20">
+            <h1 className="text-xl font-extrabold text-slate-900">Organizer Command Console</h1>
+            <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-bold text-indigo-700 border border-indigo-200">
               Role: ORGANIZER
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-600">
             Monitor real-time event check-ins, process scans, export CSV rosters, and query server-side AI insights.
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-500 hover:to-indigo-500"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:from-indigo-700 hover:to-blue-700"
         >
           <Plus className="h-4 w-4" />
           Create New Event
@@ -265,13 +265,13 @@ export function OrganizerView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Active Events List */}
         <div className="space-y-4">
-          <h2 className="text-xs font-bold tracking-wider text-slate-400 uppercase">Active Campus Events</h2>
+          <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase">Active Campus Events</h2>
           {loading ? (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-center text-xs text-slate-400">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center text-xs text-slate-500">
               Loading events...
             </div>
           ) : events.length === 0 ? (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-center text-xs text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-500">
               No events found. Click "Create New Event" above.
             </div>
           ) : (
@@ -282,24 +282,24 @@ export function OrganizerView() {
                   onClick={() => setSelectedEvent(evt)}
                   className={`cursor-pointer rounded-2xl border p-4 transition ${
                     selectedEvent?.id === evt.id
-                      ? "border-cyan-500/80 bg-cyan-500/10 shadow-lg shadow-cyan-500/15"
-                      : "border-slate-800/80 bg-slate-900/40 hover:border-slate-700"
+                      ? "border-indigo-500 bg-indigo-50/60 shadow-xs"
+                      : "border-slate-200 bg-white hover:border-slate-300 shadow-xs"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-white text-sm">{evt.title}</h3>
+                    <h3 className="font-bold text-slate-900 text-sm">{evt.title}</h3>
                     {evt.isFull ? (
-                      <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20">
+                      <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
                         FULL
                       </span>
                     ) : (
-                      <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+                      <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
                         OPEN
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-slate-400 line-clamp-2">{evt.description}</p>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/60 pt-2">
+                  <p className="mt-1 text-xs text-slate-600 line-clamp-2">{evt.description}</p>
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2 font-medium">
                     <span>Cap: {evt.capacity}</span>
                     <span>Reg: {evt.registeredCount}</span>
                     <span>CheckIn: {evt.checkedInCount}</span>
@@ -315,24 +315,24 @@ export function OrganizerView() {
           {selectedEvent ? (
             <>
               {/* Event Live Metrics Panel */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-5 backdrop-blur-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-5 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                   <div>
-                    <h2 className="text-base font-bold text-white">{selectedEvent.title}</h2>
-                    <p className="text-xs text-slate-400">Live Operations Metrics</p>
+                    <h2 className="text-base font-bold text-slate-900">{selectedEvent.title}</h2>
+                    <p className="text-xs text-slate-500">Live Operations Metrics</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => fetchAiInsights()}
                       disabled={aiLoading}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-bold text-indigo-300 transition hover:bg-indigo-500/20 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50"
                     >
                       <Sparkles className={`h-3.5 w-3.5 ${aiLoading ? "animate-spin" : ""}`} />
                       {aiLoading ? "Analyzing..." : "Generate AI Insights"}
                     </button>
                     <button
                       onClick={handleExportCsv}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3.5 py-1.5 text-xs font-bold text-blue-300 transition hover:bg-blue-500/20"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 shadow-xs"
                     >
                       <Download className="h-3.5 w-3.5" />
                       Export CSV
@@ -342,47 +342,47 @@ export function OrganizerView() {
 
                 {/* Metric Cards Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-3.5">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Capacity</div>
-                    <div className="mt-1 text-2xl font-black text-white">{selectedEvent.capacity}</div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Capacity</div>
+                    <div className="mt-1 text-2xl font-black text-slate-900">{selectedEvent.capacity}</div>
                   </div>
-                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3.5">
-                    <div className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Registered</div>
-                    <div className="mt-1 text-2xl font-black text-blue-400">{selectedEvent.registeredCount}</div>
+                  <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3.5">
+                    <div className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Registered</div>
+                    <div className="mt-1 text-2xl font-black text-indigo-800">{selectedEvent.registeredCount}</div>
                   </div>
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5">
-                    <div className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Checked In</div>
-                    <div className="mt-1 text-2xl font-black text-emerald-400">{selectedEvent.checkedInCount}</div>
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5">
+                    <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Checked In</div>
+                    <div className="mt-1 text-2xl font-black text-emerald-800">{selectedEvent.checkedInCount}</div>
                   </div>
-                  <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3.5">
-                    <div className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
+                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-3.5">
+                    <div className="text-[10px] font-bold text-blue-700 uppercase tracking-wider flex items-center gap-1">
                       <TrendingUp className="h-3 w-3" /> Check-In Rate
                     </div>
-                    <div className="mt-1 text-2xl font-black text-indigo-400">
+                    <div className="mt-1 text-2xl font-black text-blue-800">
                       {dashboardMetrics ? `${dashboardMetrics.checkInPercentage}%` : "0%"}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3.5">
-                    <div className="text-[10px] font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1">
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5">
+                    <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider flex items-center gap-1">
                       <UserX className="h-3 w-3" /> No-Show Count
                     </div>
-                    <div className="mt-1 text-2xl font-black text-rose-400">
+                    <div className="mt-1 text-2xl font-black text-rose-800">
                       {dashboardMetrics ? dashboardMetrics.noShowCount : 0}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3.5">
-                    <div className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5">
+                    <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
                       <Clock className="h-3 w-3" /> Peak Arrival
                     </div>
-                    <div className="mt-1 text-xs font-bold text-cyan-300 truncate">
+                    <div className="mt-1 text-xs font-bold text-amber-900 truncate">
                       {dashboardMetrics ? dashboardMetrics.peakCheckInTime : "N/A"}
                     </div>
                   </div>
                 </div>
 
                 {/* AI Insights Interaction Section */}
-                <div className="rounded-2xl border border-indigo-500/30 bg-slate-950/80 p-5 space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-300 font-bold text-sm">
+                <div className="rounded-2xl border border-indigo-200 bg-indigo-50/40 p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
                     <Bot className="h-4 w-4" />
                     Ask Event Intelligence
                   </div>
@@ -396,7 +396,7 @@ export function OrganizerView() {
                           setCustomQuestion(q);
                           fetchAiInsights(q);
                         }}
-                        className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-[11px] font-medium text-indigo-200 hover:bg-indigo-500/20 text-left transition"
+                        className="rounded-lg border border-indigo-200 bg-white px-2.5 py-1 text-[11px] font-medium text-indigo-700 hover:bg-indigo-50 text-left transition shadow-xs"
                       >
                         {q}
                       </button>
@@ -405,20 +405,20 @@ export function OrganizerView() {
 
                   {/* AI Response Box */}
                   {aiInsight && (
-                    <div className="rounded-xl border border-indigo-500/40 bg-indigo-500/10 p-4 space-y-2 text-xs">
-                      <div className="flex items-center justify-between border-b border-indigo-500/20 pb-2">
-                        <span className="font-bold text-indigo-300">Query: "{aiInsight.query}"</span>
+                    <div className="rounded-xl border border-indigo-200 bg-white p-4 space-y-2 text-xs shadow-xs">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <span className="font-bold text-indigo-700">Query: "{aiInsight.query}"</span>
                         {aiInsight.isFallback && (
-                          <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
                             Ground-Truth Engine
                           </span>
                         )}
                       </div>
-                      <p className="text-slate-200 leading-relaxed">{aiInsight.summary}</p>
+                      <p className="text-slate-700 leading-relaxed">{aiInsight.summary}</p>
                       {aiInsight.recommendations.length > 0 && (
                         <div className="pt-2">
-                          <div className="font-bold text-indigo-300 mb-1">Recommendations:</div>
-                          <ul className="list-disc list-inside space-y-1 text-slate-300">
+                          <div className="font-bold text-indigo-700 mb-1">Recommendations:</div>
+                          <ul className="list-disc list-inside space-y-1 text-slate-700">
                             {aiInsight.recommendations.map((rec, idx) => (
                               <li key={idx}>{rec}</li>
                             ))}
@@ -431,13 +431,13 @@ export function OrganizerView() {
 
                 {/* Checked-In Roster List */}
                 <div className="pt-2">
-                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     Live Checked-In Attendee Roster
                   </h3>
 
                   {dashboardMetrics?.recentCheckIns.length === 0 ? (
-                    <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-center text-xs text-slate-500">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-xs text-slate-500">
                       No checked-in attendees yet for this event.
                     </div>
                   ) : (
@@ -445,14 +445,14 @@ export function OrganizerView() {
                       {dashboardMetrics?.recentCheckIns.map((ci) => (
                         <div
                           key={ci.id}
-                          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs"
+                          className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs"
                         >
                           <div>
-                            <div className="font-semibold text-white">{ci.attendeeName}</div>
-                            <div className="text-[11px] text-slate-400">{ci.attendeeEmail}</div>
+                            <div className="font-semibold text-slate-900">{ci.attendeeName}</div>
+                            <div className="text-[11px] text-slate-500">{ci.attendeeEmail}</div>
                           </div>
                           <div className="text-right">
-                            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
                               Checked In
                             </span>
                             <div className="text-[10px] text-slate-500 mt-1 font-mono">
@@ -467,10 +467,10 @@ export function OrganizerView() {
               </div>
 
               {/* QR Scan Input Panel */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4 backdrop-blur-xl">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <QrCode className="h-5 w-5 text-cyan-400" />
-                  <h3 className="font-bold text-white text-sm">QR Code Check-In Console</h3>
+                  <QrCode className="h-5 w-5 text-indigo-600" />
+                  <h3 className="font-bold text-slate-900 text-sm">QR Code Check-In Console</h3>
                 </div>
 
                 <form onSubmit={handleProcessCheckIn} className="flex gap-2">
@@ -479,12 +479,12 @@ export function OrganizerView() {
                     value={scanToken}
                     onChange={(e) => setScanToken(e.target.value)}
                     placeholder="Scan camera or paste ORBIT-REG-... QR token"
-                    className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none"
                   />
                   <button
                     type="submit"
                     disabled={scanLoading || !scanToken.trim()}
-                    className="rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/20 transition hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50"
+                    className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition hover:from-indigo-700 hover:to-blue-700 disabled:opacity-50"
                   >
                     {scanLoading ? "Scanning..." : "Process Scan"}
                   </button>
@@ -495,10 +495,10 @@ export function OrganizerView() {
                   <div
                     className={`rounded-xl border p-4 text-xs font-semibold ${
                       scanStatus.type === "success"
-                        ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                         : scanStatus.type === "duplicate"
-                        ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                        : "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                        ? "border-amber-200 bg-amber-50 text-amber-800"
+                        : "border-rose-200 bg-rose-50 text-rose-800"
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -512,7 +512,7 @@ export function OrganizerView() {
               </div>
             </>
           ) : (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-12 text-center text-xs text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-xs text-slate-500">
               Select an event from the left list to view metrics and scan check-ins.
             </div>
           )}
@@ -521,73 +521,73 @@ export function OrganizerView() {
 
       {/* Create Event Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-base font-bold text-white border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
               Create Event
             </h3>
             <form onSubmit={handleCreateEvent} className="mt-4 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-300">Title</label>
+                <label className="block text-xs font-medium text-slate-700">Title</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. MIC Tech Summit 2026"
-                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300">Description</label>
+                <label className="block text-xs font-medium text-slate-700">Description</label>
                 <textarea
                   required
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Brief description..."
-                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300">Date & Time</label>
+                  <label className="block text-xs font-medium text-slate-700">Date & Time</label>
                   <input
                     type="datetime-local"
                     required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300">Capacity Limit</label>
+                  <label className="block text-xs font-medium text-slate-700">Capacity Limit</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={capacity}
                     onChange={(e) => setCapacity(Number(e.target.value))}
-                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="mt-4 flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500"
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                 >
                   {createLoading ? "Saving..." : "Create Event"}
                 </button>
@@ -599,3 +599,4 @@ export function OrganizerView() {
     </div>
   );
 }
+

@@ -1,20 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f0ede7;
+  --foreground: #16151a;
+  --card: #fffdf9;
+  --card-foreground: #16151a;
+  --primary: #e443b4;
+  --primary-foreground: #ffffff;
+  --border: rgba(22, 21, 26, 0.14);
+  --ink: #16151a;
+  --ink-soft: #25232b;
+  --paper: #f0ede7;
+  --paper-light: #fbfaf6;
+  --paper-line: rgba(22, 21, 26, 0.16);
+  --ivory: #fffdf9;
+  --magenta: #e443b4;
+  --violet: #7a54ff;
+  --cobalt: #4b79ff;
+  --vermilion: #f06f48;
+  --muted-ink: #827d87;
+  --muted-dark: #9d98a5;
+  --serif: var(--font-syne), "Syne", sans-serif;
+  --body: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --mono: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
-  background: var(--background);
+  margin: 0;
+  background: var(--ink);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+.font-heading { font-family: var(--serif); }
+.font-mono-code { font-family: var(--mono); }
+
+/* Brand Mark & Typography Utility Classes */
+.brand-mark { width: 35px; height: 35px; display: grid; place-items: center; overflow: hidden; background: linear-gradient(135deg, var(--magenta), var(--violet)); border-radius: 10px; box-shadow: 0 10px 28px rgba(228,67,180,.27); }
+.brand-wordmark { font: 700 17px/1 var(--serif); letter-spacing: -.05em; }
+.brand-wordmark > span { color: var(--magenta); }
+
+/* Editorial Card Base */
+.editorial-card {
+  background: #ffffff;
+  border: 1px solid var(--paper-line);
+  transition: all 250ms var(--ease-out);
+}
+.editorial-card:hover {
+  border-color: var(--magenta);
+  box-shadow: 0 12px 30px rgba(22, 21, 26, 0.08);
+}

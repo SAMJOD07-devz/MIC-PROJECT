@@ -1,7 +1,25 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { QrCode, ShieldCheck, User, WifiOff, Sparkles, ArrowRight, CheckCircle2, ChevronDown, Lock, Cpu, BarChart3, Check, Zap } from "lucide-react";
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  LocateFixed,
+  MoveUpRight,
+  ScanLine,
+  Sparkles,
+  Users,
+  Zap,
+  Download,
+  BarChart3,
+  CheckCircle2,
+  Lock,
+  WifiOff,
+  QrCode
+} from 'lucide-react';
+import { playClickSFX, playHoverSFX } from '@/lib/audio';
 
 interface LandingPageProps {
   onEnterOrganizer: () => void;
@@ -9,237 +27,443 @@ interface LandingPageProps {
   onOpenLogin: () => void;
 }
 
+const signalItems = [
+  { value: '03', label: 'clubs live now', tone: 'magenta' },
+  { value: '82%', label: 'Hall B capacity', tone: 'cobalt' },
+  { value: '00:14', label: 'average check-in', tone: 'vermilion' },
+  { value: '24/7', label: 'campus signal', tone: 'ivory' },
+];
+
+const workflow = [
+  {
+    number: '01',
+    title: 'Create the moment',
+    copy: 'Set a room, a capacity, a time window, and the story you want people to find.',
+    icon: CalendarDays,
+  },
+  {
+    number: '02',
+    title: 'Share one clear pass',
+    copy: 'Your event gets a simple page and a digital QR pass that is ready for the group chat.',
+    icon: ArrowUpRight,
+  },
+  {
+    number: '03',
+    title: 'Scan the arrival',
+    copy: 'Check people in quickly with duplicate-proof validation that keeps the queue moving.',
+    icon: ScanLine,
+  },
+  {
+    number: '04',
+    title: 'See the room change',
+    copy: 'Live capacity signals help organizers make better calls while the event is in motion.',
+    icon: MoveUpRight,
+  },
+];
+
 export function LandingPage({
   onEnterOrganizer,
   onEnterAttendee,
-  onOpenLogin,
+  onOpenLogin
 }: LandingPageProps) {
-  const [hoveredRole, setHoveredRole] = useState<"organizer" | "attendee" | null>(null);
 
-  function scrollToFeatures() {
-    const el = document.getElementById("features");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  }
+  useEffect(() => {
+    const root = document.documentElement;
+    const handlePointerMove = (event: PointerEvent) => {
+      const x = ((event.clientX / window.innerWidth) - 0.5) * 2;
+      const y = ((event.clientY / window.innerHeight) - 0.5) * 2;
+      root.style.setProperty('--parallax-x', `${Math.round(x * 12)}px`);
+      root.style.setProperty('--parallax-y', `${Math.round(y * 9)}px`);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    return () => window.removeEventListener('pointermove', handlePointerMove);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <div className="space-y-20 py-4 sm:py-8">
-      {/* Hero Section */}
-      <div className="relative flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto px-4">
-        {/* Trust Status Badge */}
-        <div className="animate-fade-in inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-bold text-indigo-700 shadow-xs">
-          <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
-          <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-          <span>Campus Event Platform • Next.js & Concurrency Guarded</span>
-        </div>
+    <div className="w-full bg-[#16151a] text-[#16151a]">
+      {/* 1. ASYMMETRIC HERO SECTION */}
+      <section id="top" className="relative min-h-[720px] pt-32 pb-16 px-4 bg-[#16151a] text-white overflow-hidden">
+        
+        {/* Ambient Radial Mesh Background */}
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#e443b4]/20 via-[#7a54ff]/10 to-transparent opacity-80 pointer-events-none" />
+        <div className="absolute inset-0 z-0 opacity-15 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 
-        {/* Main Headline */}
-        <div className="space-y-4">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
-            Every event. One seamless <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">check-in orbit.</span>
-          </h1>
+        <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column: Editorial Headline & Actions */}
+          <div className="lg:col-span-6 space-y-6">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] font-mono font-bold tracking-widest text-[#ffabdd] uppercase">
+              <span className="w-2 h-2 rounded-full bg-[#e443b4] animate-pulse" />
+              LIVE EVENT OPERATING SYSTEM <span className="text-white/40">EST. 2024</span>
+            </div>
 
-          <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Create events, issue secure anti-sharing QR tickets, scan attendees offline or online with zero duplicates, and track live metrics effortlessly.
-          </p>
-        </div>
+            <h1 className="font-heading text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[0.92] text-white">
+              Make every <br />
+              <em className="not-italic bg-gradient-to-r from-[#e443b4] via-[#ff81c8] to-[#7a54ff] bg-clip-text text-transparent">
+                arrival
+              </em> count.
+            </h1>
 
-        {/* Hero Interactive UI Preview Card Graphic (Replaces Heavy 3D Orb) */}
-        <div className="w-full max-w-2xl mx-auto pt-2 pb-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 text-left space-y-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <p className="text-slate-300 text-base sm:text-lg font-light leading-relaxed max-w-lg">
+              OrbitCheck brings discovery, registration, and duplicate-proof check-in into one calm, live layer for campus life.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <button
+                onClick={() => {
+                  playClickSFX();
+                  onEnterOrganizer();
+                }}
+                onMouseEnter={playHoverSFX}
+                className="px-6 py-3.5 rounded-xl font-bold bg-gradient-to-r from-[#e443b4] to-[#7a54ff] text-white hover:opacity-95 transition shadow-lg flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
+              >
+                Enter as organizer <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => {
+                  playClickSFX();
+                  onEnterAttendee();
+                }}
+                onMouseEnter={playHoverSFX}
+                className="px-6 py-3.5 rounded-xl font-bold bg-white/10 border border-white/20 text-white hover:bg-white/15 transition flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
+              >
+                Enter as attendee <ArrowUpRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 text-[10px] font-mono text-white/50 pt-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e443b4]" />
+              Built for the moment before the room fills.
+            </div>
+          </div>
+
+          {/* Right Column: Live Orbit Field Box */}
+          <div className="lg:col-span-6 relative min-h-[460px] flex items-center justify-center">
             
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
-                  MIC
+            {/* Outer Orbit Rings */}
+            <div className="absolute w-80 sm:w-96 h-80 sm:h-96 rounded-full border border-white/15 animate-spin [animation-duration:35s] pointer-events-none" />
+            <div className="absolute w-64 sm:w-72 h-64 sm:h-72 rounded-full border border-[#e443b4]/30 pointer-events-none" />
+
+            {/* Central Core Capacity Signal */}
+            <div className="w-48 h-48 rounded-full bg-gradient-to-tr from-[#28212e] via-[#7134b8] to-[#e443b4] p-6 shadow-2xl flex flex-col items-center justify-center text-center relative z-10 border border-white/20">
+              <span className="text-[9px] font-mono tracking-widest text-white/70 uppercase">LIVE / HALL B</span>
+              <strong className="font-heading text-5xl font-extrabold text-white my-1">82%</strong>
+              <span className="text-[9px] font-mono tracking-wider text-white/60">capacity in motion</span>
+            </div>
+
+            {/* Floating Live Signal Fragment Cards */}
+            <div className="absolute top-4 left-4 bg-[#23202b]/90 border border-white/20 p-3 rounded-2xl backdrop-blur-md shadow-xl flex items-center gap-3 z-20">
+              <div className="p-2 rounded-xl bg-[#e443b4]/20 text-[#ffabdd]">
+                <ScanLine className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[8px] font-mono tracking-widest text-white/50 block">CHECK-IN</span>
+                <strong className="text-xs font-bold text-white block">+18 arrivals</strong>
+              </div>
+              <span className="text-[9px] font-mono text-white/40 ml-2">now</span>
+            </div>
+
+            <div className="absolute bottom-12 right-2 bg-[#23202b]/90 border border-white/20 p-3 rounded-full backdrop-blur-md shadow-xl flex items-center gap-2 z-20">
+              <div className="w-7 h-7 rounded-full bg-[#4b79ff] flex items-center justify-center text-white">
+                <Users className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="text-[8px] font-mono tracking-widest text-white/50 block">DISCOVERED</span>
+                <strong className="text-xs font-bold text-white block">Design Society</strong>
+              </div>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-1 animate-ping" />
+            </div>
+
+            <div className="absolute bottom-6 left-8 bg-[#23202b]/90 border border-white/20 px-3 py-2 rounded-xl backdrop-blur-md shadow-xl flex items-center gap-2 z-20 text-[10px] font-mono text-white/70">
+              <LocateFixed className="w-3.5 h-3.5 text-[#e443b4]" />
+              <span>ROOM 04</span>
+              <b className="text-emerald-400">Open</b>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. DENSE LIVE SIGNAL STRIP */}
+      <section id="signal" className="bg-[#f0ede7] border-y border-slate-300 py-6 px-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-6 items-center text-slate-900">
+          <div className="col-span-2 md:col-span-1 pr-4 border-r border-slate-300/80">
+            <span className="text-[9px] font-mono font-bold tracking-widest text-slate-500 uppercase block">LIVE SIGNAL</span>
+            <strong className="font-heading text-lg font-bold text-slate-900 leading-tight block mt-0.5">For the room as it changes.</strong>
+          </div>
+
+          {signalItems.map((item, idx) => (
+            <div key={idx} className="p-3 rounded-xl bg-white/70 border border-slate-200/80">
+              <strong className="font-heading text-2xl font-extrabold text-slate-900 block leading-none">{item.value}</strong>
+              <span className="text-[10px] font-mono text-slate-600 block mt-1">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. PLATFORM PAPER SECTION WITH DETERMINISTIC HTML/CSS CAMPUS MAP */}
+      <section id="platform" className="bg-[#f0ede7] py-20 px-4 text-slate-900">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
+          <div className="lg:col-span-5 space-y-6">
+            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block">
+              ONE LAYER / MANY MOMENTS
+            </span>
+            <h2 className="font-heading text-4xl sm:text-6xl font-extrabold text-slate-900 leading-none tracking-tight">
+              Less queue. <br />
+              <em className="not-italic text-[#e443b4]">More campus.</em>
+            </h2>
+            <p className="text-slate-600 text-sm leading-relaxed font-light">
+              Give every event a clear front door. OrbitCheck makes the operational layer feel as considered as the experience itself, from the first tap to the last person in the room.
+            </p>
+
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-300">
+              <div>
+                <strong className="font-heading text-2xl font-bold text-slate-900 block">01</strong>
+                <span className="text-[9px] font-mono text-slate-500 uppercase block mt-0.5">shared event link</span>
+              </div>
+              <div>
+                <strong className="font-heading text-2xl font-bold text-slate-900 block">∞</strong>
+                <span className="text-[9px] font-mono text-slate-500 uppercase block mt-0.5">ways to discover</span>
+              </div>
+              <div>
+                <strong className="font-heading text-2xl font-bold text-slate-900 block">0</strong>
+                <span className="text-[9px] font-mono text-slate-500 uppercase block mt-0.5">duplicate entries</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => scrollTo('workflow')}
+              className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-900 hover:text-[#e443b4] transition pt-2 cursor-pointer"
+            >
+              See the system <ArrowUpRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Code-Rendered HTML/CSS Campus Live-Map Artifact */}
+          <div className="lg:col-span-7">
+            <div className="rounded-3xl bg-[#1c1a22] p-6 text-white relative overflow-hidden min-h-[460px] flex flex-col justify-between border border-slate-800 shadow-2xl">
+              
+              {/* Header Info Bar */}
+              <div className="flex justify-between items-center text-[9px] font-mono tracking-widest text-white/50 border-b border-white/10 pb-3">
+                <span>ORBITCHECK / LIVE MAP</span>
+                <span>03 CAMPUS NODES ACTIVE</span>
+              </div>
+
+              {/* Map Canvas Frame */}
+              <div className="relative my-6 h-64 bg-slate-900/90 rounded-2xl overflow-hidden border border-white/10">
+                {/* Road Grids */}
+                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/20 transform -rotate-12" />
+                <div className="absolute top-1/3 left-1/4 bottom-0 w-0.5 bg-white/20 transform rotate-45" />
+
+                {/* Building Blocks */}
+                <div className="absolute top-6 left-8 w-24 h-12 rounded-lg bg-white/10 border border-white/20" />
+                <div className="absolute bottom-6 right-10 w-28 h-14 rounded-lg bg-white/10 border border-white/20" />
+
+                {/* Map Pins */}
+                <div className="absolute top-12 left-16 flex items-center gap-1.5 text-[9px] font-mono font-bold text-white">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#e443b4] ring-4 ring-[#e443b4]/20" />
+                  <span>HALL B</span>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">Campus Tech Hackathon 2026</h4>
-                  <p className="text-[11px] text-slate-500">Live Campus Event • Auditorium A</p>
+
+                <div className="absolute bottom-10 left-12 flex items-center gap-1.5 text-[9px] font-mono font-bold text-white">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#f06f48] ring-4 ring-[#f06f48]/20" />
+                  <span>ROOM 04</span>
+                </div>
+
+                <div className="absolute top-16 right-12 flex items-center gap-1.5 text-[9px] font-mono font-bold text-white">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#4b79ff] ring-4 ring-[#4b79ff]/20" />
+                  <span>NORTH QUAD</span>
+                </div>
+
+                {/* Center Badge */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-[#e443b4] shadow-xl flex flex-col items-center justify-center text-center border-2 border-white">
+                  <strong className="font-heading text-xl font-bold leading-none">03</strong>
+                  <span className="text-[7px] font-mono uppercase tracking-widest text-white/80 mt-0.5">LIVE EVENTS</span>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                <Check className="w-3 h-3 text-emerald-600" /> 142 / 150 Checked In
-              </span>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 space-y-1">
-                <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Capacity Lock</div>
-                <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-indigo-600" /> Atomic DB Lock
-                </div>
-              </div>
-              <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 space-y-1">
-                <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">QR Verification</div>
-                <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Instant Hash Scan
-                </div>
-              </div>
-              <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 space-y-1">
-                <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Offline Sync</div>
-                <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <WifiOff className="w-3.5 h-3.5 text-amber-600" /> IndexedDB Queue
+              {/* Bottom Footer Details */}
+              <div className="flex justify-between items-center text-[10px] font-mono text-white/60 border-t border-white/10 pt-3">
+                <div><span>DESIGN SOCIETY</span> — <strong className="text-white">82% capacity</strong></div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>Clear Gate Flow</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Role Entry Action CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md pt-2">
-          <button
-            onClick={onEnterOrganizer}
-            onMouseEnter={() => setHoveredRole("organizer")}
-            onMouseLeave={() => setHoveredRole(null)}
-            className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <ShieldCheck className="h-4 w-4" />
-            Enter as Organizer
-          </button>
+      {/* 4. ORGANIZER CONTROL SECTION */}
+      <section className="bg-[#16151a] py-20 px-4 text-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-5 space-y-6">
+            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase block">
+              02 / ORGANIZER CONTROL
+            </span>
+            <h2 className="font-heading text-4xl sm:text-6xl font-extrabold text-white leading-none tracking-tight">
+              Know what is <br />
+              <em className="not-italic text-[#e443b4]">happening now.</em>
+            </h2>
+            <p className="text-slate-400 text-sm font-light leading-relaxed">
+              Build a rhythm people can feel. Keep the room visible without turning the room into a spreadsheet.
+            </p>
 
-          <button
-            onClick={onEnterAttendee}
-            onMouseEnter={() => setHoveredRole("attendee")}
-            onMouseLeave={() => setHoveredRole(null)}
-            className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2.5 rounded-2xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-xs transition-all duration-200 hover:scale-[1.02] hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
-          >
-            <User className="h-4 w-4 text-indigo-600" />
-            Enter as Attendee
-          </button>
-        </div>
-
-        {/* Secondary Scroll Action */}
-        <button
-          onClick={scrollToFeatures}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition pt-2"
-        >
-          Explore features & architecture
-          <ChevronDown className="h-4 w-4 animate-bounce text-indigo-600" />
-        </button>
-
-        {/* Trust/Status Micro Line */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-4 text-xs font-medium text-slate-500 border-t border-slate-200 w-full">
-          <span className="flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5 text-indigo-600" /> Secure Anti-Sharing QR
-          </span>
-          <span className="flex items-center gap-1.5">
-            <WifiOff className="h-3.5 w-3.5 text-amber-600" /> IndexedDB Offline Outbox
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Cpu className="h-3.5 w-3.5 text-blue-600" /> Server AI Insights
-          </span>
-        </div>
-      </div>
-
-      {/* Feature Grid Section */}
-      <div id="features" className="space-y-8 pt-8 border-t border-slate-200">
-        <div className="text-center space-y-2">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-600">Architected for Speed & Reliability</h2>
-          <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">Built for High-Throughput Campus Events</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-3 shadow-xs hover:shadow-md transition hover:border-indigo-300 hover:-translate-y-0.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600">
-              <QrCode className="h-6 w-6" />
+            <div className="editorial-card p-5 rounded-2xl bg-white/5 border border-white/15 space-y-3">
+              <div className="flex justify-between text-[9px] font-mono text-white/50">
+                <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#e443b4]" /> Live Signal</span>
+                <span>Updated 07:42</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-bold text-white">
+                <span>Design Society — Hall B</span>
+                <span className="text-[#ffabdd] font-mono">82%</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-[#e443b4] to-[#7a54ff] w-[82%]" />
+              </div>
+              <div className="flex justify-between text-[10px] font-mono text-white/60">
+                <span>156 checked in</span>
+                <span>34 spots left</span>
+              </div>
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Secure QR Entry</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Every registration receives a unique encrypted token hash. Database-level unique constraints guarantee duplicate check-ins are rejected instantly with original timestamps.
+          </div>
+
+          <div className="lg:col-span-7 space-y-4">
+            <div className="editorial-card p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#e443b4] transition space-y-2">
+              <span className="text-xs font-mono font-bold text-[#e443b4]">01</span>
+              <h3 className="font-heading text-xl font-bold text-white">Duplicate-proof by default</h3>
+              <p className="text-slate-400 text-xs font-light leading-relaxed">
+                Every scan is validated in the moment, so the line stays human and the data stays clean.
+              </p>
+            </div>
+
+            <div className="editorial-card p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#7a54ff] transition space-y-2">
+              <span className="text-xs font-mono font-bold text-[#7a54ff]">02</span>
+              <h3 className="font-heading text-xl font-bold text-white">Capacity you can actually use</h3>
+              <p className="text-slate-400 text-xs font-light leading-relaxed">
+                Make room for a better decision with a simple signal, not a wall of admin panels.
+              </p>
+            </div>
+
+            <div className="editorial-card p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#f06f48] transition space-y-2">
+              <span className="text-xs font-mono font-bold text-[#f06f48]">03</span>
+              <h3 className="font-heading text-xl font-bold text-white">A better front door for attendees</h3>
+              <p className="text-slate-400 text-xs font-light leading-relaxed">
+                Discovery, digital passes, and arrival live in the same visual language from day one.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. WORKFLOW PAPER SECTION */}
+      <section id="workflow" className="bg-[#f0ede7] py-20 px-4 text-slate-900">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-slate-300 pb-6">
+            <div>
+              <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block">03 / THE MOVEMENT</span>
+              <h2 className="font-heading text-4xl sm:text-5xl font-extrabold text-slate-900">From signal to shared moment.</h2>
+            </div>
+            <p className="text-slate-600 text-xs font-light max-w-xs">Four small actions. One much clearer event day.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {workflow.map(({ number, title, copy, icon: Icon }, idx) => (
+              <div key={idx} className="p-6 rounded-2xl bg-white border border-slate-300 space-y-4 shadow-xs relative">
+                <div className="flex justify-between items-center text-slate-900">
+                  <span className="text-xs font-mono font-bold text-slate-400">{number}</span>
+                  <div className="p-2 rounded-full border border-slate-200">
+                    <Icon className="w-4 h-4 text-[#e443b4]" />
+                  </div>
+                </div>
+                <h3 className="font-heading text-xl font-bold text-slate-900">{title}</h3>
+                <p className="text-slate-600 text-xs font-light leading-relaxed">{copy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. REAL-WORLD EVENT MANAGER CAPABILITIES */}
+      <section className="bg-[#16151a] py-20 px-4 text-white">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center space-y-2">
+            <span className="text-[10px] font-mono font-bold tracking-widest text-[#e443b4] uppercase">REAL-WORLD EVENT INFRASTRUCTURE</span>
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold text-white">Everything Event Managers Need</h2>
+            <p className="text-slate-400 max-w-xl mx-auto text-xs sm:text-sm font-light">
+              Designed specifically for student coordinators, campus club presidents, and fest directors to manage high-throughput crowds seamlessly.
             </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-3 shadow-xs hover:shadow-md transition hover:border-amber-300 hover:-translate-y-0.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 border border-amber-100 text-amber-600">
-              <WifiOff className="h-6 w-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-[#e443b4]/15 text-[#e443b4] flex items-center justify-center font-bold">
+                <Zap className="w-5 h-5" />
+              </div>
+              <h4 className="font-heading font-bold text-white text-base">Sub-100ms Gate Scans</h4>
+              <p className="text-slate-400 text-xs leading-relaxed font-light">
+                High-speed webcam scanner validating QR codes instantly at entry gates to prevent queue bottlenecks.
+              </p>
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Works When Wi-Fi Does Not</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Scans made during network outages are queued locally in Dexie IndexedDB outbox with client UUID keys and automatically synchronized with server authority upon reconnect.
-            </p>
-          </div>
 
-          {/* Card 3 */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-3 shadow-xs hover:shadow-md transition hover:border-blue-300 hover:-translate-y-0.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 text-blue-600">
-              <BarChart3 className="h-6 w-6" />
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-[#7a54ff]/15 text-[#7a54ff] flex items-center justify-center font-bold">
+                <Download className="w-5 h-5" />
+              </div>
+              <h4 className="font-heading font-bold text-white text-base">1-Click CSV Roster Export</h4>
+              <p className="text-slate-400 text-xs leading-relaxed font-light">
+                Export verified attendance sheets with timestamps directly to Excel/CSV for official college attendance credits.
+              </p>
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Live Event Intelligence</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Organizers monitor real-time capacity fill %, peak arrival windows, and checked-in attendee rosters with server-side AI operational insight suggestions.
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* How OrbitCheck Works 3-Step Section */}
-      <div className="space-y-8 pt-8 border-t border-slate-200">
-        <div className="text-center space-y-2">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-600">Simple 3-Step Workflow</h2>
-          <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">How OrbitCheck Powers Campus Events</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-2 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-xs font-bold text-white">1</span>
-              <h4 className="font-bold text-slate-900 text-sm">Create an Event</h4>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-[#f06f48]/15 text-[#f06f48] flex items-center justify-center font-bold">
+                <Users className="w-5 h-5" />
+              </div>
+              <h4 className="font-heading font-bold text-white text-base">Multi-Gate Sync</h4>
+              <p className="text-slate-400 text-xs leading-relaxed font-light">
+                Coordinate entry across multiple doors simultaneously without risk of duplicate ticket entries.
+              </p>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed pt-2">
-              Organizers define event title, description, date, and atomic capacity limits.
-            </p>
-          </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-2 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-xs font-bold text-white">2</span>
-              <h4 className="font-bold text-slate-900 text-sm">Claim QR Ticket</h4>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-[#4b79ff]/15 text-[#4b79ff] flex items-center justify-center font-bold">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <h4 className="font-heading font-bold text-white text-base">Live Analytics Dashboard</h4>
+              <p className="text-slate-400 text-xs leading-relaxed font-light">
+                Track arrival velocity, peak rush hours, and capacity fill percentages in real-time.
+              </p>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed pt-2">
-              Attendees claim tickets with 1-click capacity locking and receive high-contrast Base64 QR codes.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-2 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-xs font-bold text-white">3</span>
-              <h4 className="font-bold text-slate-900 text-sm">Scan & Monitor Live</h4>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed pt-2">
-              Organizers scan tickets via webcam or manual console and download CSV rosters.
-            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Bottom CTA Section */}
-      <div className="rounded-3xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 p-8 sm:p-12 text-center space-y-6 shadow-xl text-white">
-        <h2 className="text-2xl sm:text-3xl font-extrabold">Enter the OrbitCheck Command Console</h2>
-        <p className="text-xs sm:text-sm text-indigo-100 max-w-md mx-auto">
-          Experience atomic capacity management, camera QR scanning, and live metrics right in your browser.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
-          <button
-            onClick={onEnterOrganizer}
-            className="w-full sm:w-auto flex-1 rounded-2xl bg-white px-6 py-3 text-xs font-bold text-indigo-700 shadow-md hover:bg-slate-50 transition"
-          >
-            Enter as Organizer
-          </button>
-          <button
-            onClick={onEnterAttendee}
-            className="w-full sm:w-auto flex-1 rounded-2xl border border-indigo-200/50 bg-indigo-500/20 px-6 py-3 text-xs font-bold text-white hover:bg-indigo-500/30 transition"
-          >
-            Enter as Attendee
-          </button>
+      {/* 7. FOOTER */}
+      <footer className="bg-[#16151a] border-t border-white/10 py-12 px-4 text-white">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-slate-400 font-mono">
+          <div className="flex items-center gap-3">
+            <div className="brand-mark">
+              <span className="font-bold text-white font-heading text-sm">O</span>
+            </div>
+            <span className="font-bold text-white text-sm font-heading">OrbitCheck</span>
+          </div>
+          <div>© 2026 OrbitCheck — Campus Event Operating Layer</div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>All System Signals Operating</span>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
-

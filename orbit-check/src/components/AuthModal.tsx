@@ -56,6 +56,12 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   }
 
   async function handleGoogleLogin() {
+    const inputEmail = window.prompt("Enter your Google Account Email to sign in with Google:", "saumya.google@gmail.com");
+    if (!inputEmail) return; // User canceled prompt
+
+    const defaultName = inputEmail.split("@")[0].replace(".", " ");
+    const inputName = window.prompt("Enter your Google Account Display Name:", defaultName) || defaultName;
+
     setLoading(true);
     setError(null);
     try {
@@ -63,8 +69,8 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "google.user@orbitcheck.com",
-          name: "Google Account User",
+          email: inputEmail.trim(),
+          name: inputName.trim(),
           role: role || "ATTENDEE",
         }),
       });

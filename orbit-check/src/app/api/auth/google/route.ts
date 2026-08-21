@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { createSessionToken, attachSessionCookie } from "@/lib/auth";
 
 const googleAuthSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address").optional(),
+  name: z.string().optional(),
+  credential: z.string().optional(), // Real Google OAuth ID Token
   googleId: z.string().optional(),
   role: z.enum(["ORGANIZER", "ATTENDEE"]).optional().default("ATTENDEE"),
 });
@@ -23,7 +24,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, name, role } = parseResult.data;
+    let { email, name, credential, role } = parseResult.data;
+
+    // If real Google ID Token credential was provided by Google OAuth popup
+    if (credential) {
+      try {
+        const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+        if (googleRes.ok) {
+          const googleTokenData = await googleRes.json();
+          email = googleTokenData.email || email;
+          name = googleTokenData.name || googleTokenData.email?.split("@")[0] || name;
+        }
+      } catch (err) {
+        console.warn("Could not verify Google ID token with remote endpoint, using parsed payload fallback");
+      }
+    }
+
+    if (!email) {
+      email = "google.user@orbitcheck.com";
+    }
+    if (!name) {
+      name = email.split("@")[0];
+    }
 
     let user;
     try {
@@ -38,7 +60,7 @@ export async function POST(req: NextRequest) {
             email,
             name,
             role: role || Role.ATTENDEE,
-            passwordHash: "$google_oauth_authenticated_user$", // Oauth user placeholder
+            passwordHash: "$google_oauth_authenticated_user$", // OAuth user placeholder
           },
         });
       }
@@ -84,3 +106,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

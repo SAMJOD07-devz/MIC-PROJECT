@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { QrCode, CheckCircle2, AlertCircle, RefreshCw, Camera, CameraOff, Volume2, ShieldCheck, Zap } from "lucide-react";
+import { Html5Qrcode } from "html5-qrcode";
 import { playClickSFX, playHoverSFX } from "@/lib/audio";
 
 interface CheckInLog {
@@ -21,8 +22,9 @@ export function CameraScanner() {
   const [logs, setLogs] = useState<CheckInLog[]>([]);
   const [lastScanStatus, setLastScanStatus] = useState<CheckInLog | null>(null);
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const lastScannedTokenRef = useRef<string>("");
+  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     checkCameraAvailability();
@@ -47,28 +49,65 @@ export function CameraScanner() {
 
   async function startCamera() {
     playClickSFX();
+    setScanError(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+      if (html5QrCodeRef.current) {
+        await stopCamera();
       }
+
+      const html5QrCode = new Html5Qrcode("qr-reader");
+      html5QrCodeRef.current = html5QrCode;
+
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        (decodedText) => {
+          handleAutoScannedQr(decodedText);
+        },
+        () => {}
+      );
+
       setCameraActive(true);
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Html5Qrcode start error:", err);
       alert("Unable to access webcam device. Please grant camera permissions or use manual token entry.");
       setCameraActive(false);
     }
   }
 
-  function stopCamera() {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+  const [scanError, setScanError] = useState<string | null>(null);
+
+  async function stopCamera() {
+    if (html5QrCodeRef.current) {
+      try {
+        if (html5QrCodeRef.current.isScanning) {
+          await html5QrCodeRef.current.stop();
+        }
+        html5QrCodeRef.current.clear();
+      } catch (err) {
+        console.error("Stop camera error:", err);
+      } finally {
+        html5QrCodeRef.current = null;
+      }
     }
     setCameraActive(false);
+  }
+
+  function handleAutoScannedQr(decodedText: string) {
+    if (!decodedText) return;
+    if (lastScannedTokenRef.current === decodedText) return;
+
+    lastScannedTokenRef.current = decodedText;
+    playClickSFX();
+    processToken(decodedText);
+
+    if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+    cooldownTimerRef.current = setTimeout(() => {
+      lastScannedTokenRef.current = "";
+    }, 2500);
   }
 
   async function processToken(tokenToScan: string) {
@@ -153,7 +192,7 @@ export function CameraScanner() {
             </h1>
           </div>
           <p className="text-slate-300 text-xs sm:text-sm font-light leading-relaxed max-w-xl">
-            Real-time duplicate-proof QR check-in engine operating at sub-100ms verification latency.
+            Real-time automated QR video scanner engine operating at sub-100ms verification latency.
           </p>
         </div>
 
@@ -190,13 +229,11 @@ export function CameraScanner() {
               )}
             </div>
 
-            {/* Video Canvas Container */}
+            {/* Video Canvas Container for Html5Qrcode Reader */}
             <div className="relative h-72 sm:h-80 bg-black/80 rounded-2xl overflow-hidden border border-white/15 flex items-center justify-center">
-              <video
-                ref={videoRef}
+              <div
+                id="qr-reader"
                 className={`w-full h-full object-cover ${cameraActive ? "block" : "hidden"}`}
-                playsInline
-                muted
               />
 
               {!cameraActive && (
@@ -206,15 +243,8 @@ export function CameraScanner() {
                   </div>
                   <span className="text-xs font-mono font-bold text-white">Camera Standby</span>
                   <p className="text-[11px] font-light text-slate-400 max-w-xs">
-                    Click "Start Webcam" above or use the token input box below to process attendee gate entries.
+                    Click "Start Webcam" above to enable automated video frame QR scanning or paste tokens below.
                   </p>
-                </div>
-              )}
-
-              {/* Scanning Laser Line Overlay */}
-              {cameraActive && (
-                <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6">
-                  <div className="w-full h-0.5 bg-[#e443b4] shadow-[0_0_15px_#e443b4] animate-bounce my-auto" />
                 </div>
               )}
             </div>

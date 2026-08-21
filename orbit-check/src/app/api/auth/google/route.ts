@@ -7,6 +7,8 @@ import { createSessionToken, attachSessionCookie } from "@/lib/auth";
 const googleAuthSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   name: z.string().optional(),
+  phone: z.string().optional(),
+  year: z.string().optional(),
   credential: z.string().optional(), // Real Google OAuth ID Token
   googleId: z.string().optional(),
   role: z.enum(["ORGANIZER", "ATTENDEE"]).optional().default("ATTENDEE"),
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let { email, name, credential, role } = parseResult.data;
+    let { email, name, phone, year, credential, role } = parseResult.data;
 
     // If real Google ID Token credential was provided by Google OAuth popup
     if (credential) {
@@ -41,10 +43,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (!email) {
-      email = "google.user@orbitcheck.com";
+      email = "google.user@vitstudent.ac.in";
     }
     if (!name) {
       name = email.split("@")[0];
+    }
+
+    // Enforce @vitstudent.ac.in domain check
+    if (!email.toLowerCase().endsWith("@vitstudent.ac.in")) {
+      return NextResponse.json(
+        {
+          error: "INVALID_EMAIL_DOMAIN",
+          message: "Only @vitstudent.ac.in email addresses are allowed for Google sign-in.",
+        },
+        { status: 400 }
+      );
     }
 
     let user;
@@ -59,6 +72,8 @@ export async function POST(req: NextRequest) {
           data: {
             email,
             name,
+            phone: phone || null,
+            year: year || null,
             role: role || Role.ATTENDEE,
             passwordHash: "$google_oauth_authenticated_user$", // OAuth user placeholder
           },
@@ -71,6 +86,8 @@ export async function POST(req: NextRequest) {
           id: `google-${Date.now()}`,
           email,
           name,
+          phone: phone || null,
+          year: year || null,
           role: role || Role.ATTENDEE,
         };
 
@@ -88,8 +105,11 @@ export async function POST(req: NextRequest) {
       id: user.id,
       email: user.email,
       name: user.name,
+      phone: user.phone,
+      year: user.year,
       role: user.role,
     };
+
 
     const token = createSessionToken(sessionUser);
     const response = NextResponse.json(

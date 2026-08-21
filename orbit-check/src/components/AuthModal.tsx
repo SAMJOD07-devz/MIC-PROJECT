@@ -14,6 +14,8 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [year, setYear] = useState("1st Year");
   const [role, setRole] = useState<"ORGANIZER" | "ATTENDEE">("ATTENDEE");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,11 +27,18 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     setLoading(true);
     setError(null);
 
+    // Client-side VIT Student Email domain validation
+    if (mode === "register" && !email.toLowerCase().endsWith("@vitstudent.ac.in")) {
+      setError("Only @vitstudent.ac.in email addresses are allowed to register.");
+      setLoading(false);
+      return;
+    }
+
     const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
     const payload =
       mode === "login"
         ? { email, password }
-        : { email, password, name, role };
+        : { email, password, name, phone, year, role };
 
     try {
       const res = await fetch(endpoint, {
@@ -56,11 +65,18 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   }
 
   async function handleGoogleLogin() {
-    const inputEmail = window.prompt("Enter your Google Account Email to sign in with Google:", "saumya.google@gmail.com");
+    const inputEmail = window.prompt("Enter your VIT Student Google Email:", "saumya.2023@vitstudent.ac.in");
     if (!inputEmail) return; // User canceled prompt
 
+    if (!inputEmail.toLowerCase().endsWith("@vitstudent.ac.in")) {
+      alert("Only @vitstudent.ac.in email addresses are allowed for Google sign-in.");
+      return;
+    }
+
     const defaultName = inputEmail.split("@")[0].replace(".", " ");
-    const inputName = window.prompt("Enter your Google Account Display Name:", defaultName) || defaultName;
+    const inputName = window.prompt("Enter your Display Name:", defaultName) || defaultName;
+    const inputPhone = window.prompt("Enter your Phone Number:", "9876543210") || "";
+    const inputYear = window.prompt("Select Academic Year (1st Year, 2nd Year, 3rd Year, 4th Year):", "2nd Year") || "2nd Year";
 
     setLoading(true);
     setError(null);
@@ -71,6 +87,8 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         body: JSON.stringify({
           email: inputEmail.trim(),
           name: inputName.trim(),
+          phone: inputPhone.trim(),
+          year: inputYear.trim(),
           role: role || "ATTENDEE",
         }),
       });
@@ -91,17 +109,17 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
   function handleQuickFill(demoType: "organizer" | "attendee") {
     if (demoType === "organizer") {
-      setEmail("organizer@orbitcheck.com");
+      setEmail("organizer@vitstudent.ac.in");
       setPassword("Password123!");
     } else {
-      setEmail("attendee1@orbitcheck.com");
+      setEmail("attendee1@vitstudent.ac.in");
       setPassword("Password123!");
     }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <h2 className="text-lg font-bold text-slate-900">
@@ -149,7 +167,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            Continue with Google
+            Continue with Google (@vitstudent.ac.in)
           </button>
         </div>
 
@@ -201,7 +219,9 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-slate-700">Email Address</label>
+            <label className="block text-xs font-medium text-slate-700">
+              VIT Student Email <span className="text-indigo-600 font-bold">(@vitstudent.ac.in)</span>
+            </label>
             <div className="mt-1 relative flex items-center">
               <Mail className="absolute left-3 h-4 w-4 text-slate-400" />
               <input
@@ -209,11 +229,44 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@orbitcheck.com"
+                placeholder="name.2023@vitstudent.ac.in"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none"
               />
             </div>
+            {mode === "register" && (
+              <p className="mt-1 text-[10px] text-slate-500">Only @vitstudent.ac.in domain allowed</p>
+            )}
           </div>
+
+          {mode === "register" && (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-slate-700">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="9876543210"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700">Academic Year</label>
+                <select
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
+                >
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
+              </div>
+            </>
+          )}
 
           <div>
             <label className="block text-xs font-medium text-slate-700">Password</label>

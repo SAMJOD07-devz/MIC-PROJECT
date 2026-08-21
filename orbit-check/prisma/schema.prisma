@@ -24,6 +24,8 @@ model User {
   email         String         @unique
   passwordHash  String
   name          String
+  phone         String?
+  year          String?
   role          Role           @default(ATTENDEE)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt

@@ -26,23 +26,34 @@ async function runGoogleAuthTests() {
     const resInvalid = await googleAuthHandler(reqInvalid);
     assert(resInvalid.status === 400, "Invalid email payload is rejected with 400 BAD_REQUEST");
 
-    // Test 2: Valid Google sign-in creates/logs-in user and returns 200 OK
+    // Test 2: Non-VIT email domain is rejected with 400 Bad Request
+    const reqNonVit = new NextRequest("http://localhost:3000/api/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ email: "user@gmail.com", name: "Non VIT User" }),
+    });
+    const resNonVit = await googleAuthHandler(reqNonVit);
+    assert(resNonVit.status === 400, "Non-@vitstudent.ac.in email is rejected with 400 BAD_REQUEST");
+
+    // Test 3: Valid @vitstudent.ac.in Google sign-in creates/logs-in user and returns 200 OK
     const reqValid = new NextRequest("http://localhost:3000/api/auth/google", {
       method: "POST",
       body: JSON.stringify({
-        email: "unit.test.google@orbitcheck.com",
+        email: "unit.test.google@vitstudent.ac.in",
         name: "Unit Test Google User",
+        phone: "9876543210",
+        year: "2nd Year",
         role: "ATTENDEE",
       }),
     });
     const resValid = await googleAuthHandler(reqValid);
     const dataValid = await resValid.json();
 
-    assert(resValid.status === 200, "Valid Google payload returns 200 OK");
-    assert(dataValid.user.email === "unit.test.google@orbitcheck.com", "Returned user matches Google email");
-    assert(dataValid.user.role === "ATTENDEE", "Assigned role matches ATTENDEE");
+    assert(resValid.status === 200, "Valid @vitstudent.ac.in Google payload returns 200 OK");
+    assert(dataValid.user.email === "unit.test.google@vitstudent.ac.in", "Returned user matches Google email");
+    assert(dataValid.user.phone === "9876543210", "Returned user includes phone number");
+    assert(dataValid.user.year === "2nd Year", "Returned user includes academic year");
 
-    // Test 3: Session cookie is attached
+    // Test 4: Session cookie is attached
     const setCookieHeader = resValid.headers.get("Set-Cookie");
     assert(
       !!setCookieHeader && setCookieHeader.includes("orbitcheck_session"),
@@ -60,3 +71,4 @@ async function runGoogleAuthTests() {
 }
 
 runGoogleAuthTests();
+

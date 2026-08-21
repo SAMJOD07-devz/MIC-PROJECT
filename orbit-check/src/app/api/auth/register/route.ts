@@ -8,6 +8,8 @@ const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   name: z.string().min(2, "Name must be at least 2 characters"),
+  phone: z.string().optional(),
+  year: z.string().optional(),
   role: z.nativeEnum(Role).optional().default(Role.ATTENDEE),
 });
 
@@ -23,7 +25,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, password, name, role } = parseResult.data;
+    const { email, password, name, phone, year, role } = parseResult.data;
+
+    // Strict VIT Student Email domain validation
+    if (!email.toLowerCase().endsWith("@vitstudent.ac.in")) {
+      return NextResponse.json(
+        {
+          error: "INVALID_EMAIL_DOMAIN",
+          message: "Only @vitstudent.ac.in email addresses are allowed to register.",
+        },
+        { status: 400 }
+      );
+    }
 
     // Check existing user
     const existingUser = await prisma.user.findUnique({
@@ -43,6 +56,8 @@ export async function POST(req: NextRequest) {
         email,
         passwordHash,
         name,
+        phone: phone || null,
+        year: year || null,
         role,
       },
     });
@@ -51,6 +66,8 @@ export async function POST(req: NextRequest) {
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
+      phone: newUser.phone,
+      year: newUser.year,
       role: newUser.role,
     };
 
@@ -69,3 +86,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

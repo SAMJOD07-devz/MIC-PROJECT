@@ -109,8 +109,20 @@ export default function HomePage() {
             {activeTab === "landing" && !user ? (
               /* Full-bleed landing page spanning 100% viewport width without extra side space */
               <LandingPage
-                onEnterOrganizer={() => handleQuickLogin("ORGANIZER")}
-                onEnterAttendee={() => handleQuickLogin("ATTENDEE")}
+                onEnterOrganizer={() => {
+                  if (user) {
+                    setActiveTab("organizer");
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+                onEnterAttendee={() => {
+                  if (user) {
+                    setActiveTab("events");
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
                 onOpenLogin={() => setShowAuthModal(true)}
               />
             ) : (

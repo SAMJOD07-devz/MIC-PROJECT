@@ -54,7 +54,7 @@ export function CameraScanner() {
         await stopCamera();
       }
 
-      const html5QrCode = new Html5Qrcode("qr-reader");
+      const html5QrCode = new Html5Qrcode("qr-reader", false);
       html5QrCodeRef.current = html5QrCode;
 
       const cameras = await Html5Qrcode.getCameras().catch(() => []);
@@ -68,8 +68,14 @@ export function CameraScanner() {
       await html5QrCode.start(
         cameraIdOrConfig,
         {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
+          fps: 15,
+          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            return {
+              width: Math.floor(minEdge * 0.85),
+              height: Math.floor(minEdge * 0.85),
+            };
+          },
         },
         (decodedText) => {
           handleAutoScannedQr(decodedText);
@@ -85,7 +91,16 @@ export function CameraScanner() {
         if (html5QrCodeRef.current) {
           await html5QrCodeRef.current.start(
             { facingMode: "user" },
-            { fps: 10, qrbox: { width: 250, height: 250 } },
+            {
+              fps: 15,
+              qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                return {
+                  width: Math.floor(minEdge * 0.85),
+                  height: Math.floor(minEdge * 0.85),
+                };
+              },
+            },
             (decodedText) => handleAutoScannedQr(decodedText),
             () => {}
           );
@@ -117,13 +132,20 @@ export function CameraScanner() {
     setCameraActive(false);
   }
 
+  function sanitizeScannedToken(rawScannedText: string): string {
+    const trimmed = rawScannedText.trim();
+    const match = trimmed.match(/ORBIT-[A-Z0-9_-]+/i);
+    return match ? match[0] : trimmed;
+  }
+
   function handleAutoScannedQr(decodedText: string) {
     if (!decodedText) return;
-    if (lastScannedTokenRef.current === decodedText) return;
+    const cleanToken = sanitizeScannedToken(decodedText);
+    if (lastScannedTokenRef.current === cleanToken) return;
 
-    lastScannedTokenRef.current = decodedText;
+    lastScannedTokenRef.current = cleanToken;
     playClickSFX();
-    processToken(decodedText);
+    processToken(cleanToken);
 
     if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
     cooldownTimerRef.current = setTimeout(() => {
@@ -132,14 +154,15 @@ export function CameraScanner() {
   }
 
   async function processToken(tokenToScan: string) {
-    if (!tokenToScan.trim()) return;
+    const cleanToken = sanitizeScannedToken(tokenToScan);
+    if (!cleanToken) return;
     setScanning(true);
 
     try {
       const res = await fetch("/api/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qrToken: tokenToScan.trim() }),
+        body: JSON.stringify({ qrToken: cleanToken }),
       });
 
       const data = await res.json();

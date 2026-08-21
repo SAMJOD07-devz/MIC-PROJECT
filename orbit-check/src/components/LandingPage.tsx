@@ -81,9 +81,9 @@ export function LandingPage({
       <div className="grain" aria-hidden="true" />
 
       <main>
-        {/* HERO SECTION WITH COSMIC PLANET & ORBITAL GRAPHICS */}
+        {/* 1. HERO SECTION WITH COSMIC PLANET & ORBITAL GRAPHICS */}
         <section id="top" className="hero section-dark">
-          {/* Pure SVG Cosmic Background replacing missing external PNG asset */}
+          {/* Pure SVG Cosmic Background */}
           <div className="absolute inset-0 z-[-3] overflow-hidden pointer-events-none">
             <svg className="w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
               <rect width="1440" height="900" fill="#16151a" />
@@ -208,7 +208,7 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* DENSE LIVE SIGNAL STRIP */}
+        {/* 2. DENSE LIVE SIGNAL STRIP */}
         <section id="signal" className="signal-strip" aria-label="Live sample signals">
           <div className="container signal-strip-inner">
             <div className="signal-intro">
@@ -224,7 +224,7 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* PLATFORM PAPER SECTION WITH HTML/CSS CAMPUS LIVE-MAP ARTIFACT */}
+        {/* 3. PLATFORM PAPER SECTION WITH HTML/CSS CAMPUS LIVE-MAP ARTIFACT */}
         <section id="platform" className="paper-section platform-section">
           <div className="container platform-grid">
             <div className="section-index">
@@ -339,7 +339,7 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* ORGANIZER CONTROL SECTION */}
+        {/* 4. ORGANIZER CONTROL SECTION */}
         <section className="section-dark signal-section">
           <div className="container signal-section-grid">
             <div className="signal-section-copy">
@@ -401,10 +401,10 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* INFINITE MARQUEE LOOP OF PAST MANAGED CAMPUS EVENTS (VIT CHENNAI) */}
+        {/* 5. INFINITE MARQUEE LOOP OF PAST MANAGED CAMPUS EVENTS (VIT CHENNAI) */}
         <PastEventsMarquee />
 
-        {/* WORKFLOW PAPER SECTION */}
+        {/* 6. WORKFLOW PAPER SECTION matching screenshot 1:1 */}
         <section id="workflow" className="paper-section workflow-section">
           <div className="container">
             <div className="workflow-heading">
@@ -427,13 +427,18 @@ export function LandingPage({
                   </div>
                   <h3>{title}</h3>
                   <p>{copy}</p>
+                  {index < workflow.length - 1 && (
+                    <span className="workflow-connector" aria-hidden="true">
+                      <ArrowRight size={15} />
+                    </span>
+                  )}
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA SECTION */}
+        {/* 7. CTA SECTION */}
         <section id="contact" className="cta-section">
           <div className="container cta-card">
             <div className="cta-orbit" aria-hidden="true">
@@ -476,7 +481,7 @@ export function LandingPage({
         </section>
       </main>
 
-      {/* FOOTER */}
+      {/* 8. FOOTER */}
       <footer className="footer section-dark">
         <div className="container footer-top">
           <button className="brand footer-brand" type="button" onClick={() => scrollTo('top')}>

@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Calendar, MapPin, Trophy, ArrowUpRight } from 'lucide-react';
 import { PastEventDetailModal, PastEventDetailed } from '@/components/Modals/PastEventDetailModal';
 import { playClickSFX, playHoverSFX } from '@/lib/audio';
+import { ArrowUpRight, Trophy, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
 
 const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
   {
@@ -18,7 +18,7 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
     gradient: 'from-purple-600 via-indigo-600 to-pink-500',
     organizer: 'Microsoft Innovations Club',
     prizePool: '₹1,50,000',
-    description: 'A 24-hour flagship hackathon hosted by MIC VITC focusing on AI Agents, Web3 Infra, and Campus Tech Solutions. Over 200 teams built cutting-edge prototypes.',
+    description: 'A 24-hour flagship hackathon hosted by MIC VITC focusing on AI Agents, Web3 Infra, and Campus Tech Solutions.',
     winners: [
       { position: '1st Place', teamName: 'Team NeuralX', projectName: 'AI Gate Check-In Agent', prizeMoney: '₹75,000', college: 'VIT Chennai' },
       { position: '2nd Place', teamName: 'Team ByteCraft', projectName: 'Offline IndexedDB Sync', prizeMoney: '₹45,000', college: 'VIT Chennai' },
@@ -27,7 +27,6 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
     coordinators: [
       { name: 'Saumya Gaurav', role: 'President & Tech Lead', email: 'saumya.gauravkumar2025@vitstudent.ac.in', phone: '+91 98765 43210' },
       { name: 'Ananya Sharma', role: 'Operations Head', email: 'ananya.sharma2025@vitstudent.ac.in', phone: '+91 98765 43211' },
-      { name: 'Rohan Verma', role: 'QR Infra Coordinator', email: 'rohan.verma2025@vitstudent.ac.in', phone: '+91 98765 43212' },
     ],
     stats: { scansPerMinute: 120, avgLatencyMs: 78, duplicateBlocked: 34 }
   },
@@ -42,15 +41,14 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
     gradient: 'from-blue-600 via-cyan-600 to-indigo-700',
     organizer: 'VIT Chennai Student Council',
     prizePool: '₹3,00,000',
-    description: 'VIT Chennai flagship annual technical extravaganza featuring robotics arenas, drone racing, gaming tournaments, and technical paper presentations.',
+    description: 'VIT Chennai flagship annual technical extravaganza featuring robotics arenas, drone racing, gaming tournaments, and technical papers.',
     winners: [
       { position: '1st Place', teamName: 'Team Cyberbot', projectName: 'Autonomous Drone Navigator', prizeMoney: '₹1,50,000', college: 'VIT Chennai' },
       { position: '2nd Place', teamName: 'Team AeroSpark', projectName: 'Solar Haptic Rover', prizeMoney: '₹90,000', college: 'IIT Madras' },
       { position: '3rd Place', teamName: 'Team RoboNexus', projectName: 'Micro-Grid Controller', prizeMoney: '₹60,000', college: 'VIT Chennai' },
     ],
     coordinators: [
-      { name: 'Karthik Raja', role: 'technoVIT Student Convenor', email: 'karthik.r2025@vitstudent.ac.in', phone: '+91 98765 43213' },
-      { name: 'Priya Sundaram', role: 'Gate Security Lead', email: 'priya.s2025@vitstudent.ac.in', phone: '+91 98765 43214' },
+      { name: 'Karthik Raja', role: 'technoVIT Convenor', email: 'karthik.r2025@vitstudent.ac.in', phone: '+91 98765 43213' },
     ],
     stats: { scansPerMinute: 180, avgLatencyMs: 65, duplicateBlocked: 112 }
   },
@@ -65,15 +63,13 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
     gradient: 'from-pink-600 via-purple-600 to-rose-500',
     organizer: 'Microsoft Innovations Club',
     prizePool: '₹1,00,000',
-    description: 'Annual developer conference featuring industry speakers from Microsoft, Google, and open-source leads sharing insights on Cloud Native, Next.js, and Distributed Systems.',
+    description: 'Developer conference featuring industry speakers from Microsoft, Google, and open-source leads sharing insights on Cloud Native & Next.js.',
     winners: [
       { position: '1st Place', teamName: 'Team CloudSync', projectName: 'Distributed Edge Vault', prizeMoney: '₹50,000', college: 'VIT Chennai' },
       { position: '2nd Place', teamName: 'Team DevPulse', projectName: 'Real-Time Telemetry Engine', prizeMoney: '₹30,000', college: 'VIT Chennai' },
-      { position: '3rd Place', teamName: 'Team OpenMesh', projectName: 'Zero-Knowledge Auth', prizeMoney: '₹20,000', college: 'SRM KTR' },
     ],
     coordinators: [
       { name: 'Saumya Gaurav', role: 'MIC President', email: 'saumya.gauravkumar2025@vitstudent.ac.in', phone: '+91 98765 43210' },
-      { name: 'Vikram Sethi', role: 'Speaker Coordinator', email: 'vikram.sethi2025@vitstudent.ac.in', phone: '+91 98765 43215' },
     ],
     stats: { scansPerMinute: 95, avgLatencyMs: 82, duplicateBlocked: 18 }
   },
@@ -91,12 +87,9 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
     description: 'The largest annual cultural festival of VIT Chennai with pro-nights, battle of the bands, choreography competitions, and fashion showcases.',
     winners: [
       { position: '1st Place', teamName: 'Team RhythmX', projectName: 'Western Dance Championship', prizeMoney: '₹1,20,000', college: 'VIT Chennai' },
-      { position: '2nd Place', teamName: 'Team AcousticPulse', projectName: 'Battle of Bands Winner', prizeMoney: '₹80,000', college: 'Loyola Chennai' },
-      { position: '3rd Place', teamName: 'Team RunwayCouture', projectName: 'Fashion Show Winner', prizeMoney: '₹50,000', college: 'VIT Chennai' },
     ],
     coordinators: [
       { name: 'Divya Nambiar', role: 'Vibrance General Secretary', email: 'divya.n2025@vitstudent.ac.in', phone: '+91 98765 43216' },
-      { name: 'Arjun Menon', role: 'Pro-Night Gate Head', email: 'arjun.m2025@vitstudent.ac.in', phone: '+91 98765 43217' },
     ],
     stats: { scansPerMinute: 220, avgLatencyMs: 62, duplicateBlocked: 210 }
   },
@@ -111,41 +104,15 @@ const VIT_CHENNAI_EVENTS_DETAILED: PastEventDetailed[] = [
     gradient: 'from-emerald-600 via-teal-600 to-blue-600',
     organizer: 'MIC & ACM VITC',
     prizePool: '₹1,20,000',
-    description: 'A intense 24-hour hackathon focused on Generative AI pipelines, intelligent campus automation, and decentralized credentials.',
+    description: 'A 24-hour hackathon focused on Generative AI pipelines, intelligent campus automation, and decentralized credentials.',
     winners: [
       { position: '1st Place', teamName: 'Team AgenticAI', projectName: 'Autonomous Campus Concierge', prizeMoney: '₹60,000', college: 'VIT Chennai' },
-      { position: '2nd Place', teamName: 'Team SecurePass', projectName: 'Biometric QR Hash Engine', prizeMoney: '₹40,000', college: 'VIT Chennai' },
-      { position: '3rd Place', teamName: 'Team Synthetix', projectName: 'Smart Roster Predictor', prizeMoney: '₹20,000', college: 'SSN Chennai' },
     ],
     coordinators: [
       { name: 'Saumya Gaurav', role: 'MIC President', email: 'saumya.gauravkumar2025@vitstudent.ac.in', phone: '+91 98765 43210' },
-      { name: 'Deepak Raj', role: 'ACM Chapter Lead', email: 'deepak.r2025@vitstudent.ac.in', phone: '+91 98765 43218' },
     ],
     stats: { scansPerMinute: 110, avgLatencyMs: 74, duplicateBlocked: 29 }
   },
-  {
-    id: 'vitc-6',
-    title: 'TEDxVITChennai 2025',
-    category: 'Ideas Symposium',
-    attendees: '450+ VIP Guests',
-    date: 'Nov 12, 2025',
-    location: 'Netaji Auditorium, VITC',
-    badge: 'KEYNOTE TALKS',
-    gradient: 'from-red-600 via-rose-600 to-purple-700',
-    organizer: 'TEDx VITC Committee',
-    prizePool: '₹50,000',
-    description: 'Independently organized TED event featuring 8 multidisciplinary speakers on science, design, climate resilience, and spatial computing.',
-    winners: [
-      { position: '1st Place', teamName: 'Distinguished Speaker', projectName: 'Keynote: Spatial AI & Human Future', prizeMoney: 'TEDx Curator Award', college: 'VIT Chennai' },
-      { position: '2nd Place', teamName: 'Student Innovator', projectName: 'Zero-Carbon Campus Initiative', prizeMoney: 'Innovator Grant', college: 'VIT Chennai' },
-      { position: '3rd Place', teamName: 'Design Fellow', projectName: 'Typography in Public Computing', prizeMoney: 'Design Fellow Award', college: 'VIT Chennai' },
-    ],
-    coordinators: [
-      { name: 'Meera Pillai', role: 'TEDx Licensee & Lead', email: 'meera.p2025@vitstudent.ac.in', phone: '+91 98765 43219' },
-      { name: 'Varun Nair', role: 'VIP Hospitality Head', email: 'varun.n2025@vitstudent.ac.in', phone: '+91 98765 43220' },
-    ],
-    stats: { scansPerMinute: 70, avgLatencyMs: 88, duplicateBlocked: 8 }
-  }
 ];
 
 export function PastEventsMarquee() {
@@ -153,7 +120,6 @@ export function PastEventsMarquee() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Double array for continuous smooth loop
   const marqueeItems = [...VIT_CHENNAI_EVENTS_DETAILED, ...VIT_CHENNAI_EVENTS_DETAILED];
 
   const handleCardClick = (item: PastEventDetailed) => {
@@ -170,22 +136,17 @@ export function PastEventsMarquee() {
 
   return (
     <>
-      <div className="w-full overflow-hidden py-8 relative bg-slate-50/60 border-y border-slate-200/80">
-        {/* Subtle Side Fade Overlay */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#fafafa] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#fafafa] to-transparent z-10 pointer-events-none" />
-
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-8 px-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100/80 border border-purple-200 text-[11px] font-bold text-purple-800 uppercase tracking-widest mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
-            VIT Chennai Events Track Record
+      <section className="paper-section py-16 overflow-hidden border-t border-b border-[#16151a]/15 bg-[#f0ede7]">
+        {/* Kinetic Editorial Section Header */}
+        <div className="container mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="mono-label text-[#827d87]">04 / VERIFIED TRACK RECORD</span>
+            <h2 className="font-heading text-3xl sm:text-5xl font-extrabold text-[#16151a] tracking-tight mt-2">
+              Managed VITC Events.
+            </h2>
           </div>
-          <h3 className="font-heading text-2xl sm:text-4xl font-extrabold text-slate-900">
-            Managed & Verified VITC Campus Fests
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-600 font-light mt-1.5">
-            Click any event card to view winners, prize money & student coordinators.
+          <p className="text-sm text-[#67626a] max-w-sm">
+            Click any event plate to view verified winners, prize money & student coordinator contacts.
           </p>
         </div>
 
@@ -205,77 +166,44 @@ export function PastEventsMarquee() {
                 key={`${item.id}-${index}`}
                 onClick={() => handleCardClick(item)}
                 onMouseEnter={playHoverSFX}
-                className="editorial-card w-80 shrink-0 rounded-3xl p-5 bg-white border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer transform hover:-translate-y-1.5"
+                className="w-80 shrink-0 relative bg-[#fffdf9] border border-[#16151a]/15 p-6 transition-transform duration-300 hover:-translate-y-2 cursor-pointer flex flex-col justify-between"
+                style={{
+                  borderTop: index % 4 === 0 ? '3px solid #e443b4' : index % 4 === 1 ? '3px solid #4b79ff' : index % 4 === 2 ? '3px solid #f06f48' : '3px solid #16151a'
+                }}
               >
-                {/* CLEAN UN-STACKED BRANDED GRAPHIC HEADER (No repeated titles/badges) */}
-                <div className={`relative h-40 rounded-2xl overflow-hidden mb-4 bg-gradient-to-tr ${item.gradient} p-4 flex flex-col justify-between shadow-xs border border-white/20`}>
-                  
-                  {/* Background Soft Glow & Pattern */}
-                  <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-white/10 rounded-full blur-lg pointer-events-none" />
-                  
-                  {/* Top Row: Single MIC Badge */}
-                  <div className="flex justify-between items-center relative z-10">
-                    <div className="inline-flex items-center gap-1.5 bg-black/35 backdrop-blur-md border border-white/25 px-2.5 py-1 rounded-xl text-[10px] font-bold text-white shadow-xs">
-                      <div className="grid grid-cols-2 gap-0.5 w-3 h-3 shrink-0">
-                        <span className="bg-[#f25022] rounded-[0.5px]" />
-                        <span className="bg-[#7fba00] rounded-[0.5px]" />
-                        <span className="bg-[#00a4ef] rounded-[0.5px]" />
-                        <span className="bg-[#ffb900] rounded-[0.5px]" />
-                      </div>
-                      <span>MIC VITC</span>
-                    </div>
-
-                    <span className="text-[10px] font-extrabold text-white/90 bg-white/20 border border-white/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                      {item.badge}
-                    </span>
+                {/* Header Meta */}
+                <div>
+                  <div className="flex justify-between items-center text-[10px] font-mono text-[#827d87] uppercase tracking-wider mb-3">
+                    <span>{item.category}</span>
+                    <span className="font-bold text-[#e443b4]">{item.badge}</span>
                   </div>
 
-                  {/* Center Minimal Icon Artwork */}
-                  <div className="relative z-10 my-auto flex justify-center">
-                    <div className="p-3 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-inner">
-                      <Trophy className="w-8 h-8 text-white/95" />
-                    </div>
-                  </div>
+                  <h3 className="font-heading text-xl font-extrabold text-[#16151a] leading-tight mb-2">
+                    {item.title}
+                  </h3>
 
-                  {/* Bottom Single Metric Pill */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-white bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 flex items-center gap-1.5 shadow-xs">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      {item.attendees}
-                    </span>
-
-                    <span className="text-[10px] font-extrabold text-white bg-white/20 border border-white/30 px-2 py-0.5 rounded-lg">
-                      Prize: {item.prizePool}
-                    </span>
-                  </div>
+                  <p className="text-xs text-[#67626a] font-light leading-relaxed line-clamp-2 mb-4">
+                    {item.description}
+                  </p>
                 </div>
 
-                {/* Clean Metadata Card Below Graphic */}
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-purple-600 block mb-1">
-                    {item.category}
-                  </span>
-                  
-                  {/* Single Source of Truth Title */}
-                  <h4 className="font-heading text-lg font-bold text-slate-900 group-hover:text-purple-600 transition leading-snug">
-                    {item.title}
-                  </h4>
-
-                  <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <span className="flex items-center gap-1 text-slate-600">
-                      <Calendar className="w-3.5 h-3.5 text-purple-600" />
-                      {item.date}
+                {/* Footer Metrics */}
+                <div className="pt-4 border-t border-[#16151a]/10 space-y-3">
+                  <div className="flex justify-between items-center text-[11px] font-mono text-[#16151a]">
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Trophy className="w-3.5 h-3.5 text-[#e443b4]" />
+                      {item.prizePool}
                     </span>
-                    <span className="flex items-center gap-1 text-slate-600 truncate max-w-[150px]" title={item.location}>
-                      <MapPin className="w-3.5 h-3.5 text-pink-600 shrink-0" />
-                      <span className="truncate">{item.location}</span>
-                    </span>
+                    <span className="text-[#827d87]">{item.attendees}</span>
                   </div>
 
-                  {/* Clean Action Callout */}
-                  <div className="mt-3 text-right">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 group-hover:text-pink-600 transition">
-                      View Winners & Coordinators <ArrowUpRight className="w-3.5 h-3.5" />
+                  <div className="flex justify-between items-center text-[10px] font-mono text-[#827d87]">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-[#7a54ff]" />
+                      {item.date}
+                    </span>
+                    <span className="font-bold text-[#16151a] flex items-center gap-1">
+                      Details <ArrowUpRight className="w-3 h-3 text-[#e443b4]" />
                     </span>
                   </div>
                 </div>
@@ -283,9 +211,9 @@ export function PastEventsMarquee() {
             ))}
           </motion.div>
         </div>
-      </div>
+      </section>
 
-      {/* Interactive Winner & Student Coordinator Details Modal */}
+      {/* Detail Modal */}
       <PastEventDetailModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

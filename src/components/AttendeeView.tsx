@@ -36,7 +36,7 @@ export function AttendeeView() {
   const [loading, setLoading] = useState(true);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
 
-  // 3-SECOND REAL-TIME LIVE POLLING
+  // 3-SECOND REAL-TIME LIVE POLLING WITH DEEP EQUALITY STATE PROTECTION
   useEffect(() => {
     fetchEvents(true);
     fetchMyTickets();
@@ -55,7 +55,12 @@ export function AttendeeView() {
       const res = await fetch("/api/events");
       const data = await res.json();
       if (res.ok && data.events) {
-        setEvents(data.events);
+        setEvents((prev) => {
+          const prevSig = JSON.stringify(prev.map((e) => ({ id: e.id, reg: e.registeredCount, chk: e.checkedInCount, cap: e.capacity })));
+          const newSig = JSON.stringify(data.events.map((e: any) => ({ id: e.id, reg: e.registeredCount, chk: e.checkedInCount, cap: e.capacity })));
+          if (prevSig === newSig && prev.length > 0) return prev;
+          return data.events;
+        });
       }
     } catch (err) {
       console.error("Fetch events error:", err);
@@ -69,7 +74,12 @@ export function AttendeeView() {
       const res = await fetch("/api/tickets/me");
       const data = await res.json();
       if (res.ok && data.tickets) {
-        setMyTickets(data.tickets);
+        setMyTickets((prev) => {
+          const prevSig = JSON.stringify(prev.map((t) => ({ id: t.id || (t as any).registrationId, status: t.status, time: t.checkInTime })));
+          const newSig = JSON.stringify(data.tickets.map((t: any) => ({ id: t.id || t.registrationId, status: t.status, time: t.checkInTime })));
+          if (prevSig === newSig && prev.length > 0) return prev;
+          return data.tickets;
+        });
       }
     } catch (err) {
       console.error("Fetch tickets error:", err);
@@ -138,10 +148,11 @@ export function AttendeeView() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myTickets.map((t) => {
+              const ticketId = t.id || (t as any).registrationId;
               const qrImageUrl = t.qrCodeDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(t.qrToken)}`;
               return (
                 <div
-                  key={t.id}
+                  key={ticketId}
                   className="rounded-3xl border border-white/15 bg-white/5 p-6 space-y-4 backdrop-blur-xl shadow-xl relative overflow-hidden flex flex-col justify-between"
                   style={{
                     borderTop: t.status === "CHECKED_IN" ? "4px solid #10b981" : "4px solid #e443b4"
@@ -182,7 +193,7 @@ export function AttendeeView() {
                     <div className="p-4 rounded-2xl bg-white text-slate-900 flex flex-col items-center justify-center text-center space-y-3 shadow-inner">
                       <div className="font-mono text-[10px] tracking-widest text-slate-500 uppercase font-bold">OFFICIAL ORBIT PASS QR</div>
                       
-                      {/* 2D QR Code Matrix Image */}
+                      {/* 2D QR Code Matrix Image with Fixed Memory Cache */}
                       <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-md">
                         <img
                           src={qrImageUrl}

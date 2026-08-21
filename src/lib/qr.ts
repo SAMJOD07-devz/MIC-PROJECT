@@ -6,6 +6,8 @@ export interface QrPayload {
   hash: string;
 }
 
+const qrCache = new Map<string, string>();
+
 // 1. Generate Unique Server-Issued QR Payload for a Registration
 export function generateRegistrationQrToken(eventId: string, attendeeId: string): QrPayload {
   const timestamp = Date.now();
@@ -24,10 +26,15 @@ export function hashQrToken(token: string): string {
   return crypto.createHash("sha256").update(token.trim()).digest("hex");
 }
 
-// 3. Generate Data URL (Base64 SVG/PNG image) for UI QR display
+// 3. Generate Data URL (Base64 SVG/PNG image) for UI QR display with Memory Caching
 export async function renderQrCodeDataUrl(token: string): Promise<string> {
+  const cacheKey = token.trim();
+  if (qrCache.has(cacheKey)) {
+    return qrCache.get(cacheKey)!;
+  }
+
   try {
-    const dataUrl = await QRCode.toDataURL(token, {
+    const dataUrl = await QRCode.toDataURL(cacheKey, {
       errorCorrectionLevel: "H",
       margin: 2,
       color: {
@@ -35,6 +42,7 @@ export async function renderQrCodeDataUrl(token: string): Promise<string> {
         light: "#FFFFFF",
       },
     });
+    qrCache.set(cacheKey, dataUrl);
     return dataUrl;
   } catch (error) {
     console.error("QR Code generation error:", error);

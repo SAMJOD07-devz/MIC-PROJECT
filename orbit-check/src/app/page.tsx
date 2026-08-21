@@ -6,6 +6,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { OrganizerView } from "@/components/OrganizerView";
 import { AttendeeView } from "@/components/AttendeeView";
 import { CameraScanner } from "@/components/CameraScanner";
+import { MotionBackground } from "@/components/MotionBackground";
 
 interface SessionUser {
   id: string;
@@ -82,7 +83,10 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white">
+    <div className="relative min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white">
+      {/* 3D Motion Vector Node Mesh Canvas */}
+      <MotionBackground />
+
       {/* Navigation Header */}
       <Header
         user={user}
@@ -94,7 +98,7 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8 relative z-10">
         {loading ? (
           <div className="flex items-center justify-center min-h-[50vh] text-xs text-slate-400">
             Loading OrbitCheck System...
@@ -128,7 +132,7 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-6 text-center text-xs text-slate-500 relative z-10 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-400">OrbitCheck System</span>

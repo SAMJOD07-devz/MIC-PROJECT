@@ -16,6 +16,7 @@
 - **Offline Outbox Architecture**: IndexedDB storage via `Dexie.js` storing scan events with client UUID idempotency keys (`idempotencyKey`), device ID, and timestamp. Reconnect auto-sync flushes to batch endpoint `/api/checkin/sync`. Server authority resolves Station A / Station B races cleanly.
 - **Live Operations & CSV Export Architecture**: Realtime live metrics (Capacity, Registered, Checked In, No-Show Count, Check-In Rate %, Peak Check-In Time calculation), modest auto-polling interval with WebSocket/SSE ready foundation, and secure organizer-only CSV roster export endpoint `GET /api/events/[id]/export`.
 - **AI Insights Architecture**: Ground-truth metric pre-computation via Prisma SQL injection, read-only LLM system prompt isolation, and deterministic rule-based fallback when LLM API keys are unconfigured/demo (`isFallback: true`).
+- **3D Motion Canvas Architecture**: HTML5 Canvas particle & node vector mesh motion background component (`src/components/MotionBackground.tsx`). Placed at `z-index: 0` with `pointer-events: none`; 100% of interactive scanner controls, metrics, text elements, and buttons remain in standard semantic HTML/DOM.
 
 ## 2. Completed Work
 - **Phase 0 (Discovery & Architecture Contract)**:
@@ -65,9 +66,12 @@
   - Updated `OrganizerView.tsx` with live metric cards and 1-click CSV download.
   - Added automated unit test suite `tests/dashboard-export.test.ts` (4/4 passed).
 - **Phase 9 (Server-Side AI Event Insights)**:
-  - Built organizer AI insights endpoint `POST /api/events/[id]/insights` with ground-truth pre-computation and deterministic rule-based fallback.
+  - Built organizer AI insights endpoint `POST /api/events/[id]/insights`.
   - Authored documentation in `docs/AI_INSIGHTS.md`.
   - Added automated unit test suite `tests/ai-insights.test.ts` (3/3 passed).
+- **Phase 10 (3D Visual Enhancement & Motion Layer)**:
+  - Built node vector mesh Canvas background `MotionBackground.tsx`.
+  - Mounted background canvas in `src/app/page.tsx` behind all DOM elements.
 
 ## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
@@ -79,15 +83,13 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 
 ## 4. Key Commands
 - **Development Server**: `cd orbit-check && npm run dev`
-- **AI Insights Unit Tests**: `cd orbit-check && npx tsx tests/ai-insights.test.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
-- **Push Phase 9 to GitHub**: `git add . && git commit -m "Phase 9: Server-Side AI Event Insights" && git push origin main`
+- **Push Phase 10 to GitHub**: `git add . && git commit -m "Phase 10: 3D Visual Enhancement and Motion Layer" && git push origin main`
 
-## 5. Files Changed in Phase 9
-- `orbit-check/src/app/api/events/[id]/insights/route.ts`
-- `orbit-check/tests/ai-insights.test.ts`
-- `docs/AI_INSIGHTS.md`
+## 5. Files Changed in Phase 10
+- `orbit-check/src/components/MotionBackground.tsx`
+- `orbit-check/src/app/page.tsx`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next Incomplete Phase
-- **Phase 10 — 3D Visual Enhancement and Motion Layer**: Enhance visual presence with dynamic animated background canvas / CSS motion layer (orbiting particle nodes, glowing QR target frames, high-end futuristic dark mode aesthetics) while keeping critical UI text and interactive buttons in semantic HTML DOM.
+- **Phase 11 — Final Verification, Evidence Suite & Polish**: Run complete end-to-end automated verification script covering all unit test suites (`tests/*.test.ts`), concurrency scripts (`scripts/*.ts`), typecheck (`tsc --noEmit`), and generate final evidence report in `docs/VERIFICATION_SUITE.md`.

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Ticket, Calendar, CheckCircle2, AlertCircle, Sparkles, Clock, QrCode } from "lucide-react";
+import { Ticket, Calendar, CheckCircle2, AlertCircle, Sparkles, Clock, QrCode, ArrowRight, ShieldCheck } from "lucide-react";
+import { EventOrbScene } from "@/components/EventOrbScene";
 
 interface EventItem {
   id: string;
@@ -108,102 +109,124 @@ export function AttendeeView() {
 
   return (
     <div className="space-y-8">
-      {/* Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-white">Attendee Event Hub</h1>
-          <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 text-xs font-semibold text-cyan-400 border border-cyan-500/20">
-            Role: ATTENDEE
-          </span>
+      {/* Hero Section with 3D Constellation Orb Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-bold text-cyan-300">
+            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+            MIC Campus Event Hub
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Discover Campus Events & Present Your <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400 bg-clip-text text-transparent">Digital QR Ticket</span>
+          </h1>
+
+          <p className="text-sm text-slate-400 max-w-xl leading-relaxed">
+            OrbitCheck guarantees atomic capacity bounds and real-time attendance validation. Register for recruitment summits and present your encrypted ticket at gate check-in.
+          </p>
         </div>
-        <p className="mt-1 text-xs text-slate-400">
-          Discover campus events, secure capacity-safe registrations, and present your unique QR ticket at check-in.
-        </p>
+
+        {/* 3D Orb Visual Card */}
+        <div className="lg:col-span-5">
+          <EventOrbScene />
+        </div>
       </div>
 
-      {/* Message Banner */}
+      {/* Message Banner Notification */}
       {bannerMessage && (
         <div
-          className={`rounded-xl border p-4 text-xs font-semibold ${
+          className={`rounded-2xl border p-4 text-xs font-semibold shadow-lg ${
             bannerMessage.type === "success"
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 shadow-emerald-500/10"
               : bannerMessage.type === "full"
-              ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+              ? "border-rose-500/40 bg-rose-500/10 text-rose-300 shadow-rose-500/10"
               : bannerMessage.type === "already"
-              ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-300"
-              : "border-rose-500/40 bg-rose-500/10 text-rose-300"
+              ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-300 shadow-cyan-500/10"
+              : "border-rose-500/40 bg-rose-500/10 text-rose-300 shadow-rose-500/10"
           }`}
         >
           {bannerMessage.text}
         </div>
       )}
 
-      {/* Section 1: My Personal Tickets */}
+      {/* Section 1: My Personal Entry Tickets */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Ticket className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-base font-bold text-white">My Entry QR Tickets</h2>
-          <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-400">
-            {tickets.length}
-          </span>
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Ticket className="h-5 w-5 text-cyan-400" />
+            <h2 className="text-lg font-bold text-white">My Entry QR Tickets</h2>
+            <span className="rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 text-xs font-bold text-cyan-300">
+              {tickets.length} Active
+            </span>
+          </div>
         </div>
 
         {loading ? (
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 text-center text-xs text-slate-400">
-            Loading your tickets...
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 text-center text-xs text-slate-400">
+            Loading your digital tickets...
           </div>
         ) : tickets.length === 0 ? (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center text-xs text-slate-500">
-            You have no active registrations yet. Register for an event below to receive your unique QR ticket!
+          /* Styled Rich Empty State Card */
+          <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center space-y-3 backdrop-blur-md">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <QrCode className="h-6 w-6" />
+            </div>
+            <h3 className="font-bold text-white text-sm">No Active Tickets Yet</h3>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              You haven't registered for any campus recruitment events. Browse available events below to claim your ticket!
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {tickets.map((ticket) => (
               <div
                 key={ticket.registrationId}
-                className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 backdrop-blur-md"
+                className="flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl transition hover:border-cyan-500/40"
               >
                 <div>
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-bold text-white text-base">{ticket.eventTitle}</h3>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
+                      <h3 className="font-bold text-white text-base leading-snug">{ticket.eventTitle}</h3>
+                      <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-400">
                         <Calendar className="h-3.5 w-3.5 text-slate-500" />
                         <span>{new Date(ticket.eventDate).toLocaleDateString()}</span>
                       </div>
                     </div>
 
-                    {/* Status Badge */}
+                    {/* Check-In Status Badge */}
                     {ticket.isCheckedIn ? (
-                      <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">
+                      <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 shadow-md shadow-emerald-500/10">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         CHECKED IN
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-400">
+                      <span className="flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-400 shadow-md shadow-amber-500/10">
                         <Clock className="h-3.5 w-3.5" />
                         REGISTERED
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-3 text-xs text-slate-400 line-clamp-2">{ticket.eventDescription}</p>
+                  <p className="mt-3 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    {ticket.eventDescription}
+                  </p>
                 </div>
 
-                {/* QR Code Container */}
-                <div className="mt-5 flex items-center justify-between border-t border-slate-800/80 pt-4">
+                {/* QR Code Presentation Stage */}
+                <div className="mt-6 flex items-center justify-between border-t border-slate-800/80 pt-4">
                   <div className="space-y-1">
-                    <div className="text-[10px] font-semibold uppercase text-slate-400">Unique Token ID</div>
-                    <div className="font-mono text-[11px] text-cyan-300 font-medium truncate max-w-[180px]">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Token Identity</div>
+                    <div className="font-mono text-[11px] text-cyan-300 font-semibold truncate max-w-[180px]">
                       {ticket.qrToken}
                     </div>
+                    <div className="text-[10px] text-slate-500">Present to gate organizer</div>
                   </div>
 
                   {ticket.qrCodeDataUrl && (
-                    <div className="rounded-xl border border-slate-700 bg-white p-2 shadow-lg">
+                    <div className="rounded-xl border border-cyan-500/30 bg-white p-2.5 shadow-lg shadow-cyan-500/10">
                       <img
                         src={ticket.qrCodeDataUrl}
-                        alt="QR Ticket Code"
+                        alt="QR Entry Ticket"
                         className="h-20 w-20 object-contain"
                       />
                     </div>
@@ -215,54 +238,70 @@ export function AttendeeView() {
         )}
       </div>
 
-      {/* Section 2: Discover Events */}
-      <div className="space-y-4 pt-4 border-t border-slate-800">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-blue-400" />
-          <h2 className="text-base font-bold text-white">Available Events</h2>
+      {/* Section 2: Event Discovery & Capacity Cards */}
+      <div className="space-y-4 pt-6 border-t border-slate-800">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-400" />
+            <h2 className="text-lg font-bold text-white">Available Campus Events</h2>
+          </div>
         </div>
 
         {events.length === 0 ? (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6 text-center text-xs text-slate-500">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 text-center text-xs text-slate-500">
             No upcoming events listed at this time.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((evt) => {
               const isRegistered = tickets.some((t) => t.eventId === evt.id);
+              const capacityPercentage = Math.round((evt.registeredCount / evt.capacity) * 100);
+
               return (
                 <div
                   key={evt.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/40 p-5 transition hover:border-slate-700"
+                  className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition hover:border-slate-700 backdrop-blur-md"
                 >
                   <div>
-                    <div className="flex items-start justify-between">
-                      <h3 className="font-bold text-white text-sm">{evt.title}</h3>
-                      <span className="text-[11px] font-medium text-slate-400">
-                        Cap: {evt.capacity}
-                      </span>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-bold text-white text-base leading-snug">{evt.title}</h3>
+                      {evt.isFull ? (
+                        <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20">
+                          FULL
+                        </span>
+                      ) : (
+                        <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+                          OPEN
+                        </span>
+                      )}
                     </div>
 
-                    <p className="mt-2 text-xs text-slate-400 line-clamp-2">{evt.description}</p>
+                    <p className="mt-2 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      {evt.description}
+                    </p>
 
-                    <div className="mt-4 flex items-center justify-between text-xs border-t border-slate-800/60 pt-3">
-                      <span className="text-slate-400">
-                        Spots left:{" "}
-                        <strong className="text-white font-bold">{evt.remainingCapacity}</strong>
-                      </span>
-                      {evt.isFull ? (
-                        <span className="font-bold text-rose-400">EVENT FULL</span>
-                      ) : (
-                        <span className="font-semibold text-emerald-400">AVAILABLE</span>
-                      )}
+                    {/* Capacity Progress Bar */}
+                    <div className="mt-5 space-y-1.5 border-t border-slate-800/80 pt-4">
+                      <div className="flex justify-between text-[11px] font-semibold">
+                        <span className="text-slate-400">Capacity Filled</span>
+                        <span className="text-cyan-400">{evt.registeredCount} / {evt.capacity} ({capacityPercentage}%)</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            evt.isFull ? "bg-rose-500" : "bg-gradient-to-r from-cyan-500 to-blue-600"
+                          }`}
+                          style={{ width: `${Math.min(100, capacityPercentage)}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-5">
+                  <div className="mt-6">
                     {isRegistered ? (
                       <button
                         disabled
-                        className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2 text-xs font-bold text-emerald-300"
+                        className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 text-xs font-bold text-emerald-300"
                       >
                         ✓ Registered
                       </button>
@@ -270,10 +309,10 @@ export function AttendeeView() {
                       <button
                         onClick={() => handleRegister(evt.id)}
                         disabled={evt.isFull || registeringId === evt.id}
-                        className={`w-full rounded-xl py-2 text-xs font-bold text-white shadow-md transition ${
+                        className={`w-full rounded-xl py-2.5 text-xs font-bold text-white shadow-md transition ${
                           evt.isFull
                             ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                            : "bg-blue-600 hover:bg-blue-500 shadow-blue-500/20"
+                            : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/20"
                         }`}
                       >
                         {registeringId === evt.id ? "Registering..." : evt.isFull ? "Event Full" : "Register Now"}

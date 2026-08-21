@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Camera, CameraOff, QrCode, RefreshCw, Wifi, WifiOff, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Camera, CameraOff, QrCode, RefreshCw, Wifi, WifiOff, AlertTriangle, CheckCircle, Clock, ShieldAlert } from "lucide-react";
 import {
   queueOfflineScan,
   getPendingOutboxScans,
@@ -17,14 +17,13 @@ export function CameraScanner() {
   const [outboxItems, setOutboxItems] = useState<OutboxScan[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastScanMessage, setLastScanMessage] = useState<{
-    type: "success" | "duplicate" | "queued" | "error";
+    type: "success" | "duplicate" | "queued" | "error" | "conflict";
     text: string;
   } | null>(null);
 
   const scannerRef = useRef<any>(null);
 
   useEffect(() => {
-    // Monitor online/offline status
     setIsOnline(navigator.onLine);
     const handleOnline = () => {
       setIsOnline(true);
@@ -75,7 +74,7 @@ export function CameraScanner() {
     } catch (err: any) {
       console.error("Camera error:", err);
       setCameraError(
-        err?.message || "Camera access denied or unsupported camera device."
+        err?.message || "Camera permission denied or camera unavailable."
       );
       setIsCameraActive(false);
     }
@@ -97,17 +96,15 @@ export function CameraScanner() {
     if (!token.trim()) return;
 
     if (!navigator.onLine) {
-      // Offline mode: queue to IndexedDB outbox
       const queued = await queueOfflineScan(token.trim(), "web-camera");
       setLastScanMessage({
         type: "queued",
-        text: `📶 Device Offline: QR token queued in local outbox (Key: ${queued.idempotencyKey.substring(0, 12)}...)`,
+        text: `📶 Device Offline: QR token queued in local IndexedDB outbox (Key: ${queued.idempotencyKey.substring(0, 12)}...)`,
       });
       fetchOutbox();
       return;
     }
 
-    // Online mode: process check-in immediately
     try {
       const res = await fetch("/api/checkin", {
         method: "POST",
@@ -133,11 +130,10 @@ export function CameraScanner() {
         });
       }
     } catch (err) {
-      // Fallback queue if request drops during transmission
       await queueOfflineScan(token.trim(), "web-camera");
       setLastScanMessage({
         type: "queued",
-        text: "📶 Network drop detected during scan. Saved to local outbox.",
+        text: "📶 Network drop detected during scan. Saved to local IndexedDB outbox.",
       });
       fetchOutbox();
     }
@@ -175,7 +171,7 @@ export function CameraScanner() {
         }
         setLastScanMessage({
           type: "success",
-          text: `🔄 Reconnect Auto-Sync Complete: Processed ${data.results.length} outbox items.`,
+          text: `🔄 Reconnect Sync Complete: Processed ${data.results.length} offline scans with server authority.`,
         });
       }
     } catch (err) {
@@ -188,11 +184,11 @@ export function CameraScanner() {
 
   return (
     <div className="space-y-6">
-      {/* Network Status Header */}
-      <div className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-4 backdrop-blur-md">
+      {/* Network Status Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           {isOnline ? (
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -201,8 +197,8 @@ export function CameraScanner() {
               Online (Live Database Connection)
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-xs font-semibold text-amber-400">
-              <WifiOff className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+              <WifiOff className="h-4 w-4 text-amber-400 animate-pulse" />
               Offline Mode (IndexedDB Outbox Active)
             </div>
           )}
@@ -211,26 +207,26 @@ export function CameraScanner() {
         <button
           onClick={autoSyncOutbox}
           disabled={!isOnline || isSyncing}
-          className="flex items-center gap-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-500/20 disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-500/20 disabled:opacity-40"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "Syncing..." : "Sync Pending Outbox"}
+          {isSyncing ? "Syncing Outbox..." : "Sync Pending Scans"}
         </button>
       </div>
 
-      {/* Main Scanner Grid */}
+      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Camera Viewport & Controls */}
-        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md">
+        {/* Left Column: Camera Viewport */}
+        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <Camera className="h-5 w-5 text-cyan-400" />
-              Camera Scanner Feed
+              Webcam Scanner Feed
             </h2>
             {isCameraActive ? (
               <button
                 onClick={stopCamera}
-                className="flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-300 hover:bg-rose-500/20"
+                className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20"
               >
                 <CameraOff className="h-3.5 w-3.5" />
                 Stop Camera
@@ -238,7 +234,7 @@ export function CameraScanner() {
             ) : (
               <button
                 onClick={startCamera}
-                className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-1 text-xs font-semibold text-white shadow-md hover:bg-cyan-500"
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-md hover:from-cyan-500 hover:to-blue-500"
               >
                 <Camera className="h-3.5 w-3.5" />
                 Start Camera
@@ -248,19 +244,19 @@ export function CameraScanner() {
 
           {/* Camera Error Message */}
           {cameraError && (
-            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-400 flex items-center gap-2">
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-400 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <span>{cameraError}</span>
             </div>
           )}
 
-          {/* HTML5 QR Scanner Video Element Container */}
-          <div className="relative overflow-hidden rounded-xl border border-slate-800 bg-slate-950 min-h-[260px] flex items-center justify-center">
+          {/* Camera Container with Scanning Frame Overlay */}
+          <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-950 min-h-[280px] flex items-center justify-center shadow-inner">
             <div id="qr-reader" className="w-full"></div>
             {!isCameraActive && (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-500">
-                <QrCode className="h-12 w-12 text-slate-700 mb-2" />
-                <p className="text-xs">Click "Start Camera" to enable webcam decoding or use manual token entry below.</p>
+                <QrCode className="h-12 w-12 text-cyan-500/40 mb-3 animate-pulse" />
+                <p className="text-xs font-medium text-slate-400">Click "Start Camera" or enter manual token below.</p>
               </div>
             )}
           </div>
@@ -274,7 +270,7 @@ export function CameraScanner() {
             }}
             className="pt-2"
           >
-            <label className="block text-xs font-medium text-slate-400 mb-1">
+            <label className="block text-xs font-bold text-slate-400 mb-1">
               Manual QR Token Input (Testing / Fallback)
             </label>
             <div className="flex gap-2">
@@ -282,21 +278,21 @@ export function CameraScanner() {
                 type="text"
                 value={manualToken}
                 onChange={(e) => setManualToken(e.target.value)}
-                placeholder="ORBIT-REG-..."
-                className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                placeholder="Paste ORBIT-REG-... payload"
+                className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
               />
               <button
                 type="submit"
-                className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700"
+                className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700"
               >
-                Submit
+                Submit Scan
               </button>
             </div>
           </form>
         </div>
 
-        {/* Right Column: Outbox Log & Live Feedback */}
-        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-md">
+        {/* Right Column: Offline Outbox Queue & Status Feedback */}
+        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur-xl">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <Clock className="h-5 w-5 text-indigo-400" />
             Offline Outbox Queue ({outboxItems.length})
@@ -305,7 +301,7 @@ export function CameraScanner() {
           {/* Feedback Banner */}
           {lastScanMessage && (
             <div
-              className={`rounded-xl border p-3 text-xs font-semibold ${
+              className={`rounded-xl border p-4 text-xs font-bold shadow-md ${
                 lastScanMessage.type === "success"
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
                   : lastScanMessage.type === "queued"
@@ -321,22 +317,22 @@ export function CameraScanner() {
 
           {/* Pending Outbox Queue Table */}
           {outboxItems.length === 0 ? (
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-6 text-center text-xs text-slate-500">
-              No pending outbox scans in IndexedDB. All scans synced cleanly!
+            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-8 text-center text-xs text-slate-500">
+              No pending outbox items. All scan events synced with PostgreSQL server!
             </div>
           ) : (
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
               {outboxItems.map((item) => (
                 <div
                   key={item.idempotencyKey}
-                  className="rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs space-y-1"
+                  className="rounded-xl border border-slate-800 bg-slate-950 p-3.5 text-xs space-y-1.5"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-cyan-400 text-[11px] truncate max-w-[200px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-cyan-400 text-[11px] font-semibold truncate max-w-[200px]">
                       {item.qrToken}
                     </span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
                         item.syncStatus === "PENDING"
                           ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
                           : item.syncStatus === "SYNCED"
@@ -347,7 +343,7 @@ export function CameraScanner() {
                       {item.syncStatus}
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-500 flex justify-between">
+                  <div className="text-[10px] text-slate-500 flex justify-between font-mono">
                     <span>Key: {item.idempotencyKey.substring(0, 16)}...</span>
                     <span>{new Date(item.offlineCapturedAt).toLocaleTimeString()}</span>
                   </div>

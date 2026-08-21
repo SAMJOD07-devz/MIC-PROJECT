@@ -25,6 +25,7 @@ It combines event discovery, digital 2D QR pass issuing, live 3-second database 
 - **Styling**: Tailwind CSS & Vanilla CSS Design System
 - **QR Engine**: `qrcode`, `html5-qrcode`
 - **Icons**: Lucide React
+- **Icons & Typography**: Syne, Space Grotesk, IBM Plex Mono
 
 ---
 
@@ -60,4 +61,4 @@ It combines event discovery, digital 2D QR pass issuing, live 3-second database 
 ## 👤 Author & Credits
 
 **Engineered & Designed by Saumya Pandya**  
-Microsoft Innovations Club (MIC), VIT Chennai.
+President & Tech Lead — Microsoft Innovations Club (MIC), VIT Chennai.

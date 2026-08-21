@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Download, QrCode, TrendingUp, UserX, Clock, CheckCircle2 } from "lucide-react";
+import { Plus, Download, QrCode, TrendingUp, UserX, Clock, CheckCircle2, Sparkles, Bot, AlertCircle } from "lucide-react";
 
 interface EventItem {
   id: string;
@@ -34,6 +34,13 @@ interface DashboardMetrics {
   }>;
 }
 
+interface AiInsightResponse {
+  query: string;
+  isFallback: boolean;
+  summary: string;
+  recommendations: string[];
+}
+
 export function OrganizerView() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
@@ -57,6 +64,10 @@ export function OrganizerView() {
   } | null>(null);
   const [scanLoading, setScanLoading] = useState(false);
 
+  // AI Insights State
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiInsight, setAiInsight] = useState<AiInsightResponse | null>(null);
+
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -64,7 +75,7 @@ export function OrganizerView() {
   useEffect(() => {
     if (selectedEvent) {
       fetchDashboardMetrics(selectedEvent.id);
-      // Setup modest 3-second auto-polling for live dashboard updates
+      setAiInsight(null);
       const interval = setInterval(() => {
         fetchDashboardMetrics(selectedEvent.id);
       }, 3000);
@@ -99,6 +110,30 @@ export function OrganizerView() {
       }
     } catch (err) {
       console.error("Fetch metrics error:", err);
+    }
+  }
+
+  async function fetchAiInsights() {
+    if (!selectedEvent) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch(`/api/events/${selectedEvent.id}/insights`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: "Analyze check-in rate and provide operational suggestions.",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAiInsight(data);
+      } else {
+        alert(data.message || "Failed to generate AI insights");
+      }
+    } catch (err) {
+      alert("Network error fetching AI insights");
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -206,7 +241,7 @@ export function OrganizerView() {
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            Monitor real-time event check-ins, process scans, export CSV rosters, and manage capacity bounds.
+            Monitor real-time event check-ins, process scans, export CSV rosters, and query AI insights.
           </p>
         </div>
 
@@ -279,13 +314,23 @@ export function OrganizerView() {
                     <h2 className="text-base font-bold text-white">{selectedEvent.title}</h2>
                     <p className="text-xs text-slate-400">Live Operations Metrics</p>
                   </div>
-                  <button
-                    onClick={handleExportCsv}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3.5 py-1.5 text-xs font-semibold text-blue-300 transition hover:bg-blue-500/20 shadow-md shadow-blue-500/10"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download CSV Roster
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={fetchAiInsights}
+                      disabled={aiLoading}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-300 transition hover:bg-indigo-500/20 disabled:opacity-50"
+                    >
+                      <Sparkles className={`h-3.5 w-3.5 ${aiLoading ? "animate-spin" : ""}`} />
+                      {aiLoading ? "Analyzing..." : "Generate AI Insights"}
+                    </button>
+                    <button
+                      onClick={handleExportCsv}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:bg-blue-500/20"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Export CSV
+                    </button>
+                  </div>
                 </div>
 
                 {/* Metric Cards Grid */}
@@ -327,6 +372,34 @@ export function OrganizerView() {
                     </div>
                   </div>
                 </div>
+
+                {/* AI Insights Result Panel */}
+                {aiInsight && (
+                  <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 space-y-2 text-xs">
+                    <div className="flex items-center justify-between border-b border-indigo-500/20 pb-2">
+                      <div className="flex items-center gap-2 text-indigo-300 font-bold">
+                        <Bot className="h-4 w-4" />
+                        AI Operational Insight
+                      </div>
+                      {aiInsight.isFallback && (
+                        <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                          Ground-Truth Deterministic Engine
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-slate-200 leading-relaxed">{aiInsight.summary}</p>
+                    {aiInsight.recommendations.length > 0 && (
+                      <div className="pt-2">
+                        <div className="font-semibold text-indigo-300 mb-1">Actionable Recommendations:</div>
+                        <ul className="list-disc list-inside space-y-1 text-slate-300">
+                          {aiInsight.recommendations.map((rec, idx) => (
+                            <li key={idx}>{rec}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Checked-In Roster List */}
                 <div className="pt-2">

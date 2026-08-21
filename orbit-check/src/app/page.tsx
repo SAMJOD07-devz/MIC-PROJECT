@@ -86,7 +86,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="relative min-h-screen bg-[#16151a] text-slate-100 flex flex-col font-sans selection:bg-[#e443b4] selection:text-white">
       {/* Navigation Header */}
       <Header
         user={user}
@@ -98,26 +98,32 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8 relative z-10">
+      <main className="flex-1 w-full relative z-10">
         {loading ? (
-          <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-slate-500">
-            <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm font-medium">Loading OrbitCheck System...</span>
+          <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-slate-400">
+            <div className="w-8 h-8 border-3 border-[#e443b4] border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-mono">Loading OrbitCheck System...</span>
           </div>
         ) : (
           <>
             {activeTab === "landing" && !user ? (
+              /* Full-bleed landing page spanning 100% viewport width without extra side space */
               <LandingPage
                 onEnterOrganizer={() => handleQuickLogin("ORGANIZER")}
                 onEnterAttendee={() => handleQuickLogin("ATTENDEE")}
                 onOpenLogin={() => setShowAuthModal(true)}
               />
-            ) : activeTab === "scanner" && user?.role === "ORGANIZER" ? (
-              <CameraScanner />
-            ) : user?.role === "ORGANIZER" ? (
-              <OrganizerView />
             ) : (
-              <AttendeeView />
+              /* Authenticated Dashboard Container */
+              <div className="mx-auto max-w-7xl w-full p-4 sm:p-6 lg:p-8">
+                {activeTab === "scanner" && user?.role === "ORGANIZER" ? (
+                  <CameraScanner />
+                ) : user?.role === "ORGANIZER" ? (
+                  <OrganizerView />
+                ) : (
+                  <AttendeeView />
+                )}
+              </div>
             )}
           </>
         )}
@@ -137,26 +143,27 @@ export default function HomePage() {
         }}
       />
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white/80 py-6 text-center text-xs text-slate-600 relative z-10 backdrop-blur-sm shadow-xs">
-        <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span
-              onClick={() => setActiveTab(user ? (user.role === "ORGANIZER" ? "organizer" : "events") : "landing")}
-              className="font-bold text-slate-800 cursor-pointer hover:text-indigo-600 transition"
-            >
-              OrbitCheck System
-            </span>
-            <span>— MIC Campus Event Command Center</span>
+      {/* Authenticated Dashboard Footer */}
+      {user && (
+        <footer className="border-t border-white/10 bg-[#16151a] py-6 text-center text-xs text-slate-400 relative z-10 backdrop-blur-sm shadow-xs">
+          <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span
+                onClick={() => setActiveTab(user ? (user.role === "ORGANIZER" ? "organizer" : "events") : "landing")}
+                className="font-bold text-white cursor-pointer hover:text-[#e443b4] transition"
+              >
+                OrbitCheck Console
+              </span>
+              <span>— MIC Campus Event Command Center</span>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] text-slate-400 font-mono">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Concurrency Guarded</span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#e443b4] inline-block"></span> IndexedDB Sync</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4 text-[11px] text-slate-500 font-medium">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Concurrency Protected</span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> IndexedDB Sync</span>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }
-

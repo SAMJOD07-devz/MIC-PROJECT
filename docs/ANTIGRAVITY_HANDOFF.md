@@ -14,6 +14,7 @@
 - **Atomic Duplicate Check-In Strategy**: `CheckIn.registrationId UNIQUE` DB constraint + `$transaction` ensures that even across multiple parallel Node server processes, exactly 1 scan succeeds and all duplicate attempts return status `409 ALREADY_CHECKED_IN` with the original check-in timestamp.
 - **UI Architecture**: Dark navy futuristic campus command center theme, glassmorphism containers, responsive role-based navigation, explicit state notifications (`SUCCESS`, `DUPLICATE`, `FULL`, `INVALID_TOKEN`).
 - **Offline Outbox Architecture**: IndexedDB storage via `Dexie.js` storing scan events with client UUID idempotency keys (`idempotencyKey`), device ID, and timestamp. Reconnect auto-sync flushes to batch endpoint `/api/checkin/sync`. Server authority resolves Station A / Station B races cleanly.
+- **Live Operations & CSV Export Architecture**: Realtime live metrics (Capacity, Registered, Checked In, No-Show Count, Check-In Rate %, Peak Check-In Time calculation), modest auto-polling interval with WebSocket/SSE ready foundation, and secure organizer-only CSV roster export endpoint `GET /api/events/[id]/export`.
 
 ## 2. Completed Work
 - **Phase 0 (Discovery & Architecture Contract)**:
@@ -54,9 +55,14 @@
   - Installed `dexie` and `html5-qrcode`.
   - Built IndexedDB outbox manager in `src/lib/offlineDb.ts`.
   - Built batch sync endpoint `POST /api/checkin/sync` with idempotency record caching.
-  - Built live camera scanner component `src/components/CameraScanner.tsx` with webcam controls, manual fallback, online/offline auto-sync, and IndexedDB outbox log.
+  - Built live camera scanner component `src/components/CameraScanner.tsx`.
   - Documented Station A / Station B race resolution in `docs/OFFLINE_SYNC.md`.
   - Added automated unit test suite `tests/offline-sync.test.ts` (3/3 passed).
+- **Phase 8 (Live Operations Dashboard & CSV Export)**:
+  - Built organizer CSV export endpoint `GET /api/events/[id]/export` with value escaping and role protection.
+  - Built live dashboard metrics endpoint `GET /api/events/[id]/dashboard` (computes check-in %, no-show count, peak check-in time, and attendee roster).
+  - Updated `OrganizerView.tsx` with live metric cards and 1-click CSV download.
+  - Added automated unit test suite `tests/dashboard-export.test.ts` (4/4 passed).
 
 ## 3. Environment Variables (Secret files like `.env` are git-ignored)
 ```env
@@ -68,20 +74,16 @@ OPENAI_API_KEY="sk-demo-or-placeholder"
 
 ## 4. Key Commands
 - **Development Server**: `cd orbit-check && npm run dev`
-- **Offline Sync Unit Tests**: `cd orbit-check && npx tsx tests/offline-sync.test.ts`
+- **Dashboard & CSV Unit Tests**: `cd orbit-check && npx tsx tests/dashboard-export.test.ts`
 - **Typecheck**: `cd orbit-check && npx tsc --noEmit`
-- **Push Phase 7 to GitHub**: `git add . && git commit -m "Phase 7: Camera Scanning and Offline-First Outbox Sync" && git push origin main`
+- **Push Phase 8 to GitHub**: `git add . && git commit -m "Phase 8: Live Operations Dashboard and CSV Export" && git push origin main`
 
-## 5. Files Changed in Phase 7
-- `orbit-check/package.json`
-- `orbit-check/package-lock.json`
-- `orbit-check/src/lib/offlineDb.ts`
-- `orbit-check/src/app/api/checkin/sync/route.ts`
-- `orbit-check/src/components/CameraScanner.tsx`
-- `orbit-check/src/app/page.tsx`
-- `orbit-check/tests/offline-sync.test.ts`
-- `docs/OFFLINE_SYNC.md`
+## 5. Files Changed in Phase 8
+- `orbit-check/src/app/api/events/[id]/export/route.ts`
+- `orbit-check/src/app/api/events/[id]/dashboard/route.ts`
+- `orbit-check/src/components/OrganizerView.tsx`
+- `orbit-check/tests/dashboard-export.test.ts`
 - `docs/ANTIGRAVITY_HANDOFF.md`
 
 ## 6. Next Incomplete Phase
-- **Phase 8 — Live Operations Dashboard and CSV Export**: Implement organizer real-time attendee dashboard (capacity, checked-in count, remaining, no-show %, peak check-in time, attendee roster with timestamps) and organizer-only CSV export endpoint (`GET /api/events/[id]/export`).
+- **Phase 9 — Server-Side AI Event Insights**: Implement organizer-only natural language AI insight query endpoint (`POST /api/events/[id]/insights`) that pre-computes authoritative SQL metrics before calling OpenAI-compatible LLM, with plain deterministic statistics fallback on service failure.

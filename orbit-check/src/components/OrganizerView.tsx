@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Users, CheckCircle2, Clock, Download, QrCode, AlertCircle, ShieldAlert, Sparkles } from "lucide-react";
+import { Plus, Download, QrCode, TrendingUp, UserX, Clock, CheckCircle2 } from "lucide-react";
 
 interface EventItem {
   id: string;
@@ -15,11 +15,30 @@ interface EventItem {
   isFull: boolean;
 }
 
+interface DashboardMetrics {
+  eventId: string;
+  eventTitle: string;
+  capacity: number;
+  registeredCount: number;
+  checkedInCount: number;
+  remainingCapacity: number;
+  noShowCount: number;
+  checkInPercentage: number;
+  peakCheckInTime: string;
+  recentCheckIns: Array<{
+    id: string;
+    attendeeName: string;
+    attendeeEmail: string;
+    checkInTime: string;
+    deviceId: string;
+  }>;
+}
+
 export function OrganizerView() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Event Creation Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -42,6 +61,17 @@ export function OrganizerView() {
     fetchEvents();
   }, []);
 
+  useEffect(() => {
+    if (selectedEvent) {
+      fetchDashboardMetrics(selectedEvent.id);
+      // Setup modest 3-second auto-polling for live dashboard updates
+      const interval = setInterval(() => {
+        fetchDashboardMetrics(selectedEvent.id);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedEvent?.id]);
+
   async function fetchEvents() {
     setLoading(true);
     try {
@@ -49,16 +79,26 @@ export function OrganizerView() {
       const data = await res.json();
       if (res.ok) {
         setEvents(data.events || []);
-        if (data.events && data.events.length > 0) {
+        if (data.events && data.events.length > 0 && !selectedEvent) {
           setSelectedEvent(data.events[0]);
         }
-      } else {
-        setError(data.message || "Failed to load events");
       }
     } catch (err) {
-      setError("Network failure loading organizer events");
+      console.error("Fetch events error:", err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchDashboardMetrics(eventId: string) {
+    try {
+      const res = await fetch(`/api/events/${eventId}/dashboard`);
+      const data = await res.json();
+      if (res.ok && data.metrics) {
+        setDashboardMetrics(data.metrics);
+      }
+    } catch (err) {
+      console.error("Fetch metrics error:", err);
     }
   }
 
@@ -120,6 +160,7 @@ export function OrganizerView() {
           timestamp: new Date(data.checkIn.checkInTime).toLocaleTimeString(),
         });
         setScanToken("");
+        if (selectedEvent) fetchDashboardMetrics(selectedEvent.id);
         fetchEvents();
       } else if (res.status === 409) {
         setScanStatus({
@@ -150,7 +191,7 @@ export function OrganizerView() {
 
   function handleExportCsv() {
     if (!selectedEvent) return;
-    alert(`Exporting CSV roster for "${selectedEvent.title}"... (CSV export endpoints connected in Phase 8)`);
+    window.open(`/api/events/${selectedEvent.id}/export`, "_blank");
   }
 
   return (
@@ -165,7 +206,7 @@ export function OrganizerView() {
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            Manage event capacity limits, process attendee QR check-in scans, and view live metrics.
+            Monitor real-time event check-ins, process scans, export CSV rosters, and manage capacity bounds.
           </p>
         </div>
 
@@ -227,28 +268,28 @@ export function OrganizerView() {
           )}
         </div>
 
-        {/* Center & Right Column: Metrics & Scanner */}
+        {/* Center & Right Column: Metrics & Live Dashboard */}
         <div className="lg:col-span-2 space-y-6">
           {selectedEvent ? (
             <>
-              {/* Event Metrics Panel */}
+              {/* Event Live Metrics Panel */}
               <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div>
                     <h2 className="text-base font-bold text-white">{selectedEvent.title}</h2>
-                    <p className="text-xs text-slate-400">ID: {selectedEvent.id}</p>
+                    <p className="text-xs text-slate-400">Live Operations Metrics</p>
                   </div>
                   <button
                     onClick={handleExportCsv}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-700"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3.5 py-1.5 text-xs font-semibold text-blue-300 transition hover:bg-blue-500/20 shadow-md shadow-blue-500/10"
                   >
-                    <Download className="h-3.5 w-3.5" />
-                    Export CSV Roster
+                    <Download className="h-4 w-4" />
+                    Download CSV Roster
                   </button>
                 </div>
 
-                {/* Cards Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Metric Cards Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div className="rounded-xl border border-slate-800 bg-slate-950 p-3">
                     <div className="text-[10px] font-semibold text-slate-400 uppercase">Total Capacity</div>
                     <div className="mt-1 text-xl font-black text-white">{selectedEvent.capacity}</div>
@@ -261,14 +302,70 @@ export function OrganizerView() {
                     <div className="text-[10px] font-semibold text-emerald-300 uppercase">Checked In</div>
                     <div className="mt-1 text-xl font-black text-emerald-400">{selectedEvent.checkedInCount}</div>
                   </div>
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
-                    <div className="text-[10px] font-semibold text-amber-300 uppercase">Spots Remaining</div>
-                    <div className="mt-1 text-xl font-black text-amber-400">{selectedEvent.remainingCapacity}</div>
+                  <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3">
+                    <div className="text-[10px] font-semibold text-indigo-300 uppercase flex items-center gap-1">
+                      <TrendingUp className="h-3 w-3" /> Check-In Rate
+                    </div>
+                    <div className="mt-1 text-xl font-black text-indigo-400">
+                      {dashboardMetrics ? `${dashboardMetrics.checkInPercentage}%` : "0%"}
+                    </div>
                   </div>
+                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3">
+                    <div className="text-[10px] font-semibold text-rose-300 uppercase flex items-center gap-1">
+                      <UserX className="h-3 w-3" /> No-Show Count
+                    </div>
+                    <div className="mt-1 text-xl font-black text-rose-400">
+                      {dashboardMetrics ? dashboardMetrics.noShowCount : 0}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3">
+                    <div className="text-[10px] font-semibold text-cyan-300 uppercase flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> Peak Check-In Time
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-cyan-300 truncate">
+                      {dashboardMetrics ? dashboardMetrics.peakCheckInTime : "N/A"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Checked-In Roster List */}
+                <div className="pt-2">
+                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    Live Checked-In Attendee Roster
+                  </h3>
+
+                  {dashboardMetrics?.recentCheckIns.length === 0 ? (
+                    <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-center text-xs text-slate-500">
+                      No checked-in attendees yet for this event.
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                      {dashboardMetrics?.recentCheckIns.map((ci) => (
+                        <div
+                          key={ci.id}
+                          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs"
+                        >
+                          <div>
+                            <div className="font-semibold text-white">{ci.attendeeName}</div>
+                            <div className="text-[11px] text-slate-400">{ci.attendeeEmail}</div>
+                          </div>
+                          <div className="text-right">
+                            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
+                              Checked In
+                            </span>
+                            <div className="text-[10px] text-slate-500 mt-1">
+                              {new Date(ci.checkInTime).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Check-In Scan Input Panel */}
+              {/* QR Scan Input Panel */}
               <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <QrCode className="h-5 w-5 text-cyan-400" />
